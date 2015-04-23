@@ -24,30 +24,11 @@ module Ribbon::EncryptedStore
     end # #intialize
 
     describe '#encrypt' do
-      def decrypt_data
-        key_and_iv = OpenSSL::PKCS5.pbkdf2_hmac(
-          dek,
-          salt,
-          4096,
-          48,
-          'SHA256'
-        )
-
-        key = key_and_iv[0..31]
-        iv  = key_and_iv[32..-1]
-
-        decryptor = OpenSSL::Cipher::AES256.new(:CBC).decrypt
-        decryptor.key = key
-        decryptor.iv = iv
-
-        Hash[JSON.parse(decryptor.update(encrypted_data) + decryptor.final).map { |k,v| [k.to_sym, v] }]
-      end
-
       let(:dek) { "abc123" }
       let(:salt) { "salt" }
       let(:encrypted_data) { hash.encrypt(dek, salt) }
       before { encrypted_data }
-      subject { decrypt_data }
+      subject { hash.decrypt(dek, encrypted_data) }
 
       context 'empty hash' do
         subject { encrypted_data }

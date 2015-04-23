@@ -10,6 +10,7 @@ module Ribbon::EncryptedStore
 
     def encrypt(dek, salt)
       return nil if empty?
+      raise "salt is too big" if salt.bytes.length > 255
 
       key, iv = _keyiv_gen(dek, salt)
 
@@ -23,14 +24,13 @@ module Ribbon::EncryptedStore
       #  ---------------------------------------------------
       # |    Version     |   Salt Length  |     Salt
       #
-      _encrypted_header_header(salt) + encryptor.update(self.to_json) + encryptor.final
+      _encrypted_data_header(salt) + encryptor.update(self.to_json) + encryptor.final
     end
 
     def decrypt(dek, data)
       return CryptoHash.new if empty?
 
-      salt = data[0..7]
-      data = data[8..-1]
+      salt, data = _split_binary_data(data)
 
       begin
         key, iv = _keyiv_gen(dek, salt)
@@ -41,13 +41,25 @@ module Ribbon::EncryptedStore
 
         new_hash = JSON.parse(decryptor.update(data) + decryptor.final)
         new_hash = Hash[new_hash.map { |k,v| [k.to_sym, v] }]
-        self.new(new_hash)
+        CryptoHash.new(new_hash)
       rescue OpenSSL::Cipher::CipherError
         raise
       end
     end
 
     private
+
+    def _split_binary_data(data)
+      version = data[0]
+      salt_length = data[1].ord
+
+      salt_start_index = 2
+      salt_end_index   = salt_start_index + salt_length - 1
+      salt = data[salt_start_index..salt_end_index]
+      data = data[salt_end_index+1..-1]
+
+      [salt, data]
+    end
 
     def _encrypted_data_header(salt)
       "\x01" + salt.bytes.length.chr + salt
