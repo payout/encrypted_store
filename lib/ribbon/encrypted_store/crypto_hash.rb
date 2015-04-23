@@ -10,7 +10,7 @@ module Ribbon::EncryptedStore
 
     def encrypt(dek, salt)
       return nil if empty?
-      raise "salt is too big" if salt.bytes.length > 255
+      raise Errors::SaltTooBigError if salt.bytes.length > 255
 
       key, iv = _keyiv_gen(dek, salt)
 
@@ -42,6 +42,8 @@ module Ribbon::EncryptedStore
         new_hash = JSON.parse(decryptor.update(data) + decryptor.final)
         new_hash = Hash[new_hash.map { |k,v| [k.to_sym, v] }]
         CryptoHash.new(new_hash)
+      rescue Exception => e
+        raise
       rescue OpenSSL::Cipher::CipherError
         raise
       end

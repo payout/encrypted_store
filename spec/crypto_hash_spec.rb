@@ -27,28 +27,120 @@ module Ribbon::EncryptedStore
       let(:dek) { "abc123" }
       let(:salt) { "salt" }
       let(:encrypted_data) { hash.encrypt(dek, salt) }
-      before { encrypted_data }
-      subject { hash.decrypt(dek, encrypted_data) }
 
-      context 'empty hash' do
-        subject { encrypted_data }
-        it { is_expected.to eq nil }
-      end # empty hash
-
-      context 'with 1 field' do
+      context 'with salt too big' do
         let(:data) { {test: 1} }
+        let(:salt) { "lkjsdfljasdflkajsddfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjasdlfkj;" }
+        subject { encrypted_data }
 
-        it { is_expected.to eq data }
-      end # with 1 field
+        it 'should raise error' do
+          expect { subject }.to raise_error Errors::SaltTooBigError
+        end
+      end
 
-      context 'with multiple fields' do
-        let(:data) { {test: 1, another: "hello"} }
+      context 'with valid salt' do
+        subject { hash.decrypt(dek, encrypted_data) }
 
-        it { is_expected.to eq data }
-      end # with multiple fields
+        context 'empty hash' do
+          subject { encrypted_data }
+          it { is_expected.to eq nil }
+        end # empty hash
+
+        context 'with 1 field' do
+          let(:data) { {test: 1} }
+
+          it { is_expected.to eq data }
+        end # with 1 field
+
+        context 'with multiple fields' do
+          let(:data) { {test: 1, another: "hello"} }
+
+          it { is_expected.to eq data }
+        end # with multiple fields
+      end
     end # #encrypt
 
     describe '#decrypt' do
+      let(:dek) { "abc123" }
+      let(:salt) { "salt" }
+      let(:data) { {hello: "world"} }
+      let(:encrypted_data) { hash.encrypt(dek, salt) }
+
+      subject { hash.decrypt(dek, encrypted_data) }
+
+      context 'without salt header' do
+        def encrypt_data_without_header(data, dek, salt)
+          key_and_iv = OpenSSL::PKCS5.pbkdf2_hmac(
+            dek,
+            salt,
+            4096,
+            48,
+            OpenSSL::Digest::SHA256.new
+          )
+
+          key = key_and_iv[0..31]
+          iv  = key_and_iv[32..-1]
+
+          encryptor = OpenSSL::Cipher::AES256.new(:CBC).encrypt
+          encryptor.key = key
+          encryptor.iv = iv
+
+          encryptor.update(self.to_json) + encryptor.final
+        end
+
+        let(:encrypted_data) { encrypt_data_without_header(data, dek, salt) }
+
+        it 'should raise error' do
+          expect { subject }.to raise_error
+        end
+      end # without salt header
+
+      context 'with bad salt' do
+        def encrypt_data_with_wrong_salt_header(data, dek, salt)
+          key_and_iv = OpenSSL::PKCS5.pbkdf2_hmac(
+            dek,
+            salt,
+            4096,
+            48,
+            OpenSSL::Digest::SHA256.new
+          )
+
+          key = key_and_iv[0..31]
+          iv  = key_and_iv[32..-1]
+
+          encryptor = OpenSSL::Cipher::AES256.new(:CBC).encrypt
+          encryptor.key = key
+          encryptor.iv = iv
+
+          "\x01" + salt.bytes.length.chr + "wrong-salt"
+        end
+
+        let(:encrypted_data) { encrypt_data_with_wrong_salt_header(data, dek, salt) }
+
+        it 'should raise error' do
+          expect { subject }.to raise_error OpenSSL::Cipher::CipherError, "wrong final block length"
+        end
+      end
+
+      context 'with valid salt' do
+        context 'empty hash' do
+          let(:data) { {} }
+
+          it { is_expected.to eq data }
+        end # empty hash
+
+        context 'with 1 field' do
+          let(:data) { {test: 1} }
+
+          it { is_expected.to eq data }
+        end # with 1 field
+
+        context 'with multiple fields' do
+          let(:data) { {test: 1, another: "hello"} }
+
+          it { is_expected.to eq data }
+        end # with multiple fields
+      end # with valid salt
     end # #decrypt
   end # CryptoHash
 end # Ribbon::EncryptedStore
