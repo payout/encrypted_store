@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.version     = Ribbon::EncryptedStore::VERSION
   s.homepage    = "http://github.com/ribbon/encrypted_store"
   s.license     = 'BSD'
-  s.summary     = "do somthing cool"
+  s.summary     = "Provides the EncryptedStore mixin"
   s.description = s.summary
   s.authors     = ["Robert Honer", "Kayvon Ghaffari"]
   s.email       = ['robert@ribbonpayments.com', 'kayvon@ribbonpayments.com']
@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'bcrypt', '~> 3.1.3', '>= 3.1.3'
   s.add_dependency 'ribbon-config', '~> 0.1.0'
+  s.add_development_dependency 'database_cleaner'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'sqlite3'

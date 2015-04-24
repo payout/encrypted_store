@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Ribbon::EncryptedStore
   module Mixins
     module ActiveRecordMixin
@@ -36,11 +38,11 @@ module Ribbon::EncryptedStore
 
       def _encryption_key
         # Encrypt new data with the primary encryption key
-        EncryptedStore.decrypt_key(EncryptionKey.find(_encrypted_key_id).dek)
+        EncryptedStore.decrypt_key(EncryptionKey.find(_encryption_key_id).dek)
       end
 
       def _encryption_key_id
-        @__encryption_key_id ||= self.encrypted_key_id || EncryptionKey.where(primary: true).first.id
+        @__encryption_key_id ||= self.encryption_key_id || EncryptionKey.get_primary_key.id
       end
 
       def _crypto_hash
@@ -58,24 +60,9 @@ module Ribbon::EncryptedStore
 
       def _encrypted_store_save
         if !(self.changed & _encrypted_store_data[:encrypted_attributes]).empty?
-          self.encryption_key_id
-          self.encrypted_store = _crypto_hash.encrypt(_encryption_key, _generate_salt)
+          self.encryption_key_id = _encryption_key_id
+          self.encrypted_store = _crypto_hash.encrypt(_encryption_key, EncryptionKeySalt.generate_salt(_encryption_key_id))
         end
-      end
-
-      def _encrypted_store_generate_salt
-        loop do
-          salt = SecureRandom.random_bytes(16)
-
-          begin
-            EncryptionKeySalt.create(encryption_key_id: _encryption_key_id, salt: salt)
-          rescue ActiveRecord::RecordNotUnique => e
-            next
-          end
-          break
-        end
-
-        salt
       end
     end # ActiveRecordMixin
   end # Mixins

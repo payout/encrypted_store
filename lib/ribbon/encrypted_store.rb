@@ -3,6 +3,7 @@ require 'ribbon/config'
 
 module Ribbon
   module EncryptedStore
+    require 'ribbon/encrypted_store/railtie' if defined?(Rails)
     autoload(:CryptoHash, 'ribbon/encrypted_store/crypto_hash')
     autoload(:Instance,   'ribbon/encrypted_store/instance')
     autoload(:Errors,     'ribbon/encrypted_store/errors')
