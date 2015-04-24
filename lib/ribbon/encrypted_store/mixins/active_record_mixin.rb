@@ -10,7 +10,7 @@ module Ribbon::EncryptedStore
 
       module ClassMethods
         def _encryption_key
-          config.decrypt_key(config.decrypt_key(EncryptionKey(self.encrypted_key_id)))
+          EncryptedStore.decrypt_key(EncryptionKey(self.encrypted_key_id))
         end
 
         def _crypto_hash
