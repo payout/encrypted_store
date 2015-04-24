@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.files       = Dir['lib/**/*.rb'] + Dir['lib/tasks/**/*.rake']
 
   s.add_dependency 'bcrypt', '~> 3.1.3', '>= 3.1.3'
+  s.add_dependency 'ribbon-config', '~> 0.1.0'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'rails', '~> 4.0.0'
