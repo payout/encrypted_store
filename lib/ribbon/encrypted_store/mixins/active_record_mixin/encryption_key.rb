@@ -62,7 +62,7 @@ module Ribbon::EncryptedStore
         end
 
         def self._get_models_with_encrypted_store
-          get_table_models.reject! { |model|
+          _get_table_models.reject! { |model|
             !(model.column_names.include?("encrypted_store") && model.column_names.include("encryption_key_id"))
           }
         end
