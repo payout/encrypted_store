@@ -39,7 +39,7 @@ module Ribbon::EncryptedStore
       end
 
       context 'with valid salt' do
-        subject { hash.decrypt(dek, encrypted_data) }
+        subject { CryptoHash.decrypt(dek, encrypted_data) }
 
         context 'empty hash' do
           subject { encrypted_data }
@@ -66,7 +66,7 @@ module Ribbon::EncryptedStore
       let(:data) { {hello: "world"} }
       let(:encrypted_data) { hash.encrypt(dek, salt) }
 
-      subject { hash.decrypt(dek, encrypted_data) }
+      subject { CryptoHash.decrypt(dek, encrypted_data) }
 
       context 'without salt header' do
         def encrypt_data_without_header(data, dek, salt)
@@ -85,7 +85,7 @@ module Ribbon::EncryptedStore
           encryptor.key = key
           encryptor.iv = iv
 
-          encryptor.update(self.to_json) + encryptor.final
+          encryptor.update(data.to_json) + encryptor.final
         end
 
         let(:encrypted_data) { encrypt_data_without_header(data, dek, salt) }
@@ -112,13 +112,13 @@ module Ribbon::EncryptedStore
           encryptor.key = key
           encryptor.iv = iv
 
-          "\x01" + salt.bytes.length.chr + "wrong-salt"
+          "\x01" + salt.bytes.length.chr + "wrong-salt" + encryptor.update(data.to_json) + encryptor.final
         end
 
         let(:encrypted_data) { encrypt_data_with_wrong_salt_header(data, dek, salt) }
 
         it 'should raise error' do
-          expect { subject }.to raise_error OpenSSL::Cipher::CipherError, "wrong final block length"
+          expect { subject }.to raise_error Errors::ChecksumFailedError
         end
       end
 

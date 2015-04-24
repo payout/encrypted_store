@@ -1,5 +1,6 @@
 require 'openssl'
 require 'json'
+require 'zlib'
 
 module Ribbon::EncryptedStore
   class CryptoHash < Hash
@@ -24,12 +25,12 @@ module Ribbon::EncryptedStore
       #  ---------------------------------------------------
       # |    Version     |   Salt Length  |     Salt
       #
-      _encrypted_data_header(salt) + encryptor.update(self.to_json) + encryptor.final
+      data_packet = _encrypted_data_header(salt) + encryptor.update(self.to_json) + encryptor.final
+      _append_crc32(data_packet)
     end
 
-    def decrypt(dek, data)
-      return CryptoHash.new if empty?
-
+    def self.decrypt(dek, data)
+      return CryptoHash.new if data.nil?
       salt, data = _split_binary_data(data)
 
       begin
@@ -51,23 +52,7 @@ module Ribbon::EncryptedStore
 
     private
 
-    def _split_binary_data(data)
-      version = data[0]
-      salt_length = data[1].ord
-
-      salt_start_index = 2
-      salt_end_index   = salt_start_index + salt_length - 1
-      salt = data[salt_start_index..salt_end_index]
-      data = data[salt_end_index+1..-1]
-
-      [salt, data]
-    end
-
-    def _encrypted_data_header(salt)
-      "\x01" + salt.bytes.length.chr + salt
-    end
-
-    def _keyiv_gen(key, salt)
+    def self._keyiv_gen(key, salt)
       key_and_iv = OpenSSL::PKCS5.pbkdf2_hmac(
         key,
         salt,
@@ -80,6 +65,36 @@ module Ribbon::EncryptedStore
       iv  = key_and_iv[32..-1]
 
       [key, iv]
+    end
+
+    def self._split_binary_data(encrypted_data)
+      # Split encrypted data and CRC
+      bytes, crc = [encrypted_data[0..-9].bytes, encrypted_data[-8..-1]]
+
+      version     = bytes[0]
+      salt_length = bytes[1]
+
+      salt_start_index = 2
+      salt_end_index   = salt_start_index + salt_length - 1
+      salt = bytes[salt_start_index..salt_end_index].pack('c*')
+      data = bytes[salt_end_index+1..-1].pack('c*')
+
+      crc = encrypted_data[-8..-1]
+      raise Errors::ChecksumFailedError unless crc == Zlib.crc32(encrypted_data[0..-9]).to_s(16)
+
+      [salt, data]
+    end
+
+    def _encrypted_data_header(salt)
+      "\x01" + salt.bytes.length.chr + salt
+    end
+
+    def _keyiv_gen(key, salt)
+      self.class._keyiv_gen(key, salt)
+    end
+
+    def _append_crc32(data)
+      data + Zlib.crc32(data).to_s(16)
     end
   end # CryptoHash
 end # Ribbon::EncryptedStore
