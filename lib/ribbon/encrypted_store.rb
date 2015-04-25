@@ -11,7 +11,7 @@ module Ribbon
 
     class << self
       def included(base)
-        if defined?(ActiveRecord) && base < ActiveRecord
+        if defined?(ActiveRecord) && base < ActiveRecord::Base
           base.send(:include, Mixins::ActiveRecordMixin)
         else
           raise Errors::UnsupportedModelError
