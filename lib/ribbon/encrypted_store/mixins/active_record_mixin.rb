@@ -32,6 +32,19 @@ module Ribbon::EncryptedStore
       ##
       # Instance Methods
       ##
+      def reencrypt(encryption_key)
+        ActiveRecord::Base.transaction {
+          self.lock!
+          _crypto_hash
+          _encryption_key_id = encryption_key.id
+          _encrypted_store_save
+        }
+      end
+
+      def reencrypt!(encryption_key)
+        reencrypt.tap { save! }
+      end
+
       def _encrypted_store_data
         self.class._encrypted_store_data
       end
@@ -42,11 +55,16 @@ module Ribbon::EncryptedStore
       end
 
       def _encryption_key_id
-        @__encryption_key_id ||= self.encryption_key_id || EncryptionKey.get_primary_key.id
+        @__encryption_key_id ||= self['encryption_key_id'] || EncryptionKey.primary_encryption_key.id
+      end
+
+      def _encryption_key_id=(key_id)
+        @__encryption_key_id = key_id
       end
 
       def _crypto_hash
-        @_crypto_hash ||= CryptoHash.decrypt(self.encrypted_store, _encryption_key)
+        puts "crypto_hash #{self['encrypted_store']}"
+        @_crypto_hash ||= CryptoHash.decrypt(_encryption_key, self['encrypted_store'])
       end
 
       def _encrypted_store_get(field)
@@ -60,8 +78,8 @@ module Ribbon::EncryptedStore
 
       def _encrypted_store_save
         if !(self.changed & _encrypted_store_data[:encrypted_attributes]).empty?
-          self.encryption_key_id = _encryption_key_id
-          self.encrypted_store = _crypto_hash.encrypt(_encryption_key, EncryptionKeySalt.generate_salt(_encryption_key_id))
+          self['encryption_key_id'] = _encryption_key_id
+          self['encrypted_store'] = _crypto_hash.encrypt(_encryption_key, EncryptionKeySalt.generate_salt(_encryption_key_id))
         end
       end
     end # ActiveRecordMixin

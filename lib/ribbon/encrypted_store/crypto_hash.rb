@@ -12,6 +12,7 @@ module Ribbon::EncryptedStore
     def encrypt(dek, salt)
       return nil if empty?
       raise Errors::SaltTooBigError if salt.bytes.length > 255
+      puts "ENCRYPT SALT: #{salt}"
 
       key, iv = _keyiv_gen(dek, salt)
 
@@ -30,6 +31,7 @@ module Ribbon::EncryptedStore
     end
 
     def self.decrypt(dek, data)
+      puts "decrypt; #{data.inspect}"
       return CryptoHash.new if data.nil?
       salt, data = _split_binary_data(data)
 
@@ -77,6 +79,7 @@ module Ribbon::EncryptedStore
       salt_start_index = 2
       salt_end_index   = salt_start_index + salt_length - 1
       salt = bytes[salt_start_index..salt_end_index].pack('c*')
+      puts "DECRYPT SALT: #{salt.inspect}"
       data = bytes[salt_end_index+1..-1].pack('c*')
 
       crc = encrypted_data[-8..-1]
