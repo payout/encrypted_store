@@ -36,13 +36,14 @@ module Ribbon::EncryptedStore
         ActiveRecord::Base.transaction {
           self.lock!
           _crypto_hash
-          _encryption_key_id = encryption_key.id
+          self._encryption_key_id = encryption_key.id
+          attribute_will_change!(_encrypted_store_data[:encrypted_attributes].first)
           _encrypted_store_save
         }
       end
 
       def reencrypt!(encryption_key)
-        reencrypt.tap { save! }
+        reencrypt(encryption_key).tap { save! }
       end
 
       def _encrypted_store_data
@@ -78,7 +79,6 @@ module Ribbon::EncryptedStore
       def _encrypted_store_save
         if !(self.changed & _encrypted_store_data[:encrypted_attributes]).empty?
           self['encryption_key_id'] = _encryption_key_id
-          puts _crypto_hash.inspect
           self['encrypted_store'] = _crypto_hash.encrypt(_encryption_key, EncryptionKeySalt.generate_salt(_encryption_key_id))
         end
       end
