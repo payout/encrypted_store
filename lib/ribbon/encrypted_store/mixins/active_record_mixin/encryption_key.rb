@@ -25,21 +25,11 @@ module Ribbon::EncryptedStore
           def retire_keys(key_ids=[])
             pkey = primary_encryption_key
 
-            if key_ids.empty?
-              # Re-encrypt all records with the primary encryption key
-              _get_models_with_encrypted_store.each { |model|
-                model.where("encryption_key_id != ?", pkey.id).each { |record|
-                  record.reencrypt!(pkey)
-                }
-              }
-            else
-              # Re-encrypt only the records that have the passed in encryption keys
-              _get_models_with_encrypted_store.each { |model|
-                model.where("encryption_key_id IN (?)", key_ids).each { |record|
-                  record.reencrypt!(pkey)
-                }
-              }
-            end
+            _get_models_with_encrypted_store.each { |model|
+              records = key_ids.empty? ? model.where("encryption_key_id != ?", pkey.id)
+                                       : model.where("encryption_key_id IN (?)", key_ids)
+              records.each { |record| record.reencrypt!(pkey) }
+            }
           end
 
           def rotate_keys
@@ -54,7 +44,7 @@ module Ribbon::EncryptedStore
           def _get_table_models
             [].tap { |models|
               ActiveRecord::Base.connection.tables.each do |table|
-                next if table.match(/\Aschema_migrations\Z/)
+                next if table.match(/\Aschema_migrations\Z/) || table.match(/\Aencryption_keys\Z/) || table.match(/\Aencryption_key_salts\Z/)
                 models.push(table.singularize.camelize.constantize)
               end
             }
@@ -62,7 +52,7 @@ module Ribbon::EncryptedStore
 
           def _get_models_with_encrypted_store
             _get_table_models.reject! { |model|
-              !(model.column_names.include?("encrypted_store") && model.column_names.include("encryption_key_id"))
+              !(model.column_names.include?("encrypted_store") && model.column_names.include?("encryption_key_id"))
             }
           end
         end # Class Methods
