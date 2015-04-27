@@ -77,8 +77,6 @@ module Ribbon::EncryptedStore
           expect(dummy_record.name).to eq "joe"
         end
       end # #reencrypt
-
-
     end # ActiveRecordMixin
   end # Mixins
 end # Ribbon::EncryptedStore
