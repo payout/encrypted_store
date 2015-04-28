@@ -9,7 +9,7 @@ module Ribbon::EncryptedStore
 
         class << self
           def primary_encryption_key
-            new_key if !_has_primary?
+            new_key unless _has_primary?
             where(primary: true).last || last
           end
 
