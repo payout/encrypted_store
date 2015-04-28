@@ -26,7 +26,7 @@ module Ribbon
     end
 
     def instance
-      @_instance ||= Instance.new
+      @__instance ||= Instance.new
     end
   end # EncryptedStore
 end # Ribbon
