@@ -1,4 +1,4 @@
-install
+install_encrypted_store
 
 Description:
     Sets up the encrypted_store initializer and necessary tables

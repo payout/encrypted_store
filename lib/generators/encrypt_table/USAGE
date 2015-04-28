@@ -1,4 +1,4 @@
-add_table
+encrypt_table
 
 Description:
     Adds necessary encrypted_store columns to the specified table name
