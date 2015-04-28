@@ -8,6 +8,5 @@ class InstallEncryptedStoreGenerator < Rails::Generators::Base
   def create_migrations
     generate "migration", "create_encryption_keys dek:binary primary:boolean"
     generate "migration", "create_encryption_key_salts salt:binary encryption_key_id:integer"
-    rake "db:migrate"
   end
 end # InstallEncryptedStoreGenerator
