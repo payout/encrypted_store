@@ -21,7 +21,7 @@ module Ribbon::EncryptedStore
 
       it 'should retire keys with the rake task' do
         expect { Rake::Task['encrypted_store:retire_keys'].execute(key_ids: '1 2 3') }
-          .to output(/^^Retired key_ids: \[("\d*"(,|)( )?)*] and reencrypted records with primary key: \d*$/i).to_stdout
+          .to output(/^^Retired key_ids: \[("\d*"(,|)( )?)*\] and reencrypted records with primary key: \d*$/i).to_stdout
       end
     end # retire_keys
 

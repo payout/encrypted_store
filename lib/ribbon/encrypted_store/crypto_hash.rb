@@ -33,24 +33,18 @@ module Ribbon::EncryptedStore
 
     class << self
       def decrypt(dek, data)
-        return CryptoHash.new if data.nil?
+        return CryptoHash.new unless data
         salt, data = _split_binary_data(data)
 
-        begin
-          key, iv = _keyiv_gen(dek, salt)
+        key, iv = _keyiv_gen(dek, salt)
 
-          decryptor = OpenSSL::Cipher::AES256.new(:CBC).decrypt
-          decryptor.key = key
-          decryptor.iv = iv
+        decryptor = OpenSSL::Cipher::AES256.new(:CBC).decrypt
+        decryptor.key = key
+        decryptor.iv = iv
 
-          new_hash = JSON.parse(decryptor.update(data) + decryptor.final)
-          new_hash = Hash[new_hash.map { |k,v| [k.to_sym, v] }]
-          CryptoHash.new(new_hash)
-        rescue Exception => e
-          raise
-        rescue OpenSSL::Cipher::CipherError
-          raise
-        end
+        new_hash = JSON.parse(decryptor.update(data) + decryptor.final)
+        new_hash = Hash[new_hash.map { |k,v| [k.to_sym, v] }]
+        CryptoHash.new(new_hash)
       end
 
       def _keyiv_gen(key, salt)
