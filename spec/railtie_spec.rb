@@ -9,8 +9,8 @@ module Ribbon::EncryptedStore
       end
 
       it 'should create a new key with the rake task' do
-        expect { Rake::Task['encrypted_store:new_key'].execute
-          .to output(/^New dummy secret: [A-Z0-9]+$/i).to_stdout }
+        expect { Rake::Task['encrypted_store:new_key'].execute }
+          .to output(/^Created new primary key: \d*$/i).to_stdout
       end
     end # new_key
 
@@ -20,8 +20,8 @@ module Ribbon::EncryptedStore
       end
 
       it 'should retire keys with the rake task' do
-        expect { Rake::Task['encrypted_store:retire_keys'].execute(key_ids: '1 2 3')
-          .to output(/^New dummy secret: [A-Z0-9]+$/i).to_stdout }
+        expect { Rake::Task['encrypted_store:retire_keys'].execute(key_ids: '1 2 3') }
+          .to output(/^^Retired key_ids: \[("\d*"(,|)( )?)*] and reencrypted records with primary key: \d*$/i).to_stdout
       end
     end # retire_keys
 
@@ -31,8 +31,8 @@ module Ribbon::EncryptedStore
       end
 
       it 'should rotate keys with the rake task' do
-        expect { Rake::Task['encrypted_store:rotate_secret'].execute
-          .to output(/^New dummy secret: [A-Z0-9]+$/i).to_stdout }
+        expect { Rake::Task['encrypted_store:rotate_keys'].execute }
+          .to output(/^Retired all key_ids and reencrypted records with new primary key: \d*$/i).to_stdout
       end
     end # rotate_keys
   end # Railtie

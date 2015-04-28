@@ -30,6 +30,8 @@ module Ribbon::EncryptedStore
                                        : model.where("encryption_key_id IN (?)", key_ids)
               records.each { |record| record.reencrypt!(pkey) }
             }
+
+            pkey
           end
 
           def rotate_keys
