@@ -13,7 +13,7 @@ module Ribbon
 
         context 'without decrypt_key config' do
           it 'should default to args passed in' do
-            expect(instance.decrypt_key("abc", true)).to eq ["abc", true]
+            expect(instance.decrypt_key("abc", true)).to eq "abc"
           end
         end # without decrypt_key config
       end # #decrypt_key
@@ -28,7 +28,7 @@ module Ribbon
 
         context 'without encrypt_key config' do
           it 'should default to args passed in' do
-            expect(instance.encrypt_key("abc", true)).to eq ["abc", true]
+            expect(instance.encrypt_key("abc", true)).to eq "abc"
           end
         end # without encrypt_key config
       end # #encrypt_key

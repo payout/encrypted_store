@@ -20,9 +20,9 @@ module Ribbon::EncryptedStore
           end # with multiple keys rotated
 
           context 'without a primary set' do
-            before { 
+            before {
               EncryptionKey.new_key
-              EncryptionKey.where(primary: true).first.update_attributes(primary: false) 
+              EncryptionKey.where(primary: true).first.update_attributes(primary: false)
             }
             it { is_expected.to eq EncryptionKey.last }
           end
@@ -73,7 +73,7 @@ module Ribbon::EncryptedStore
           let(:dummy_record) { DummyModel.new }
           let(:dummy_record_2) { DummyModel.new }
           let(:orig_key_id) { dummy_record.encryption_key_id }
-          before { 
+          before {
             dummy_record.name = "joe"
             dummy_record.age = 14
             dummy_record.save
@@ -87,9 +87,9 @@ module Ribbon::EncryptedStore
           }
 
           context 'with key_ids arg' do
-            before { 
+            before {
               new_key
-              EncryptionKey.retire_keys(key_ids) 
+              EncryptionKey.retire_keys(key_ids)
             }
             let(:new_key) { EncryptionKey.new_key }
 
@@ -152,9 +152,9 @@ module Ribbon::EncryptedStore
           end
 
           context 'without key_ids arg' do
-            before { 
+            before {
               new_key
-              EncryptionKey.retire_keys(key_ids) 
+              EncryptionKey.retire_keys(key_ids)
             }
             let(:new_key) { EncryptionKey.new_key }
 
@@ -170,15 +170,15 @@ module Ribbon::EncryptedStore
         describe '#rotate_keys' do
           let(:dummy_record) { DummyModel.new }
           let(:dummy_record_2) { DummyModel.new }
-          before { 
+          before {
             dummy_record.name = "joe"
             dummy_record.age = 14
-            dummy_record.save
+            dummy_record.save!
 
             EncryptionKey.new_key
             dummy_record_2.name = "bob"
             dummy_record_2.age = 10
-            dummy_record_2.save
+            dummy_record_2.save!
 
             EncryptionKey.rotate_keys
           }

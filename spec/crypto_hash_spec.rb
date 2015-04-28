@@ -30,11 +30,21 @@ module Ribbon::EncryptedStore
 
       context 'with salt too big' do
         let(:data) { {test: 1} }
-        let(:salt) { "lkjsdfljasdflkajsddfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjlkjsdfljasdflkajsdfasdlfkjasdlfkj;" }
+        let(:salt) { "\x01" * 256 }
         subject { encrypted_data }
 
         it 'should raise error' do
           expect { subject }.to raise_error Errors::SaltTooBigError
+        end
+      end
+
+      context 'with salt max length' do
+        let(:data) { {test: 1} }
+        let(:salt) { "\x01" * 255 }
+        subject { encrypted_data }
+
+        it 'should not raise error' do
+          expect { subject }.not_to raise_error
         end
       end
 

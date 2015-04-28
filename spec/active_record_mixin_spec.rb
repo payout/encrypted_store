@@ -16,7 +16,7 @@ module Ribbon::EncryptedStore
         end
 
         it 'should set and get the values when saved' do
-          dummy_record.age = 4 
+          dummy_record.age = 4
           dummy_record.name = "joe"
           dummy_record.save
           expect(dummy_record.age).to eq 4
@@ -67,6 +67,14 @@ module Ribbon::EncryptedStore
           dummy_record.name = "joe"
           dummy_record.save
         }
+
+        it 'should not save the new key with reencrypt' do
+          new_key = ActiveRecordMixin::EncryptionKey.new_key
+          dummy_record.reencrypt(new_key)
+          expect(DummyModel.find(dummy_record).encryption_key_id).not_to eq new_key.id
+          expect(DummyModel.find(dummy_record).age).to eq dummy_record.age
+          expect(DummyModel.find(dummy_record).name).to eq dummy_record.name
+        end
 
         it 'should reencrypt with the new encryption key' do
           prv_key_id = dummy_record.encryption_key_id
