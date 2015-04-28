@@ -44,13 +44,8 @@ module Ribbon::EncryptedStore
           end
 
           def _get_table_models
-            [].tap { |models|
-              Rails.application.eager_load! if defined?(Rails) && Rails.application
-              ActiveRecord::Base.descendants.each do |model|
-                next if model == EncryptionKey || model == EncryptionKeySalt
-                models.push(model)
-              end
-            }
+            Rails.application.eager_load! if defined?(Rails) && Rails.application
+            ActiveRecord::Base.descendants
           end
 
           def _get_models_with_encrypted_store
