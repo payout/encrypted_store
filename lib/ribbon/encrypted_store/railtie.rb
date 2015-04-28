@@ -1,5 +1,6 @@
 require 'ribbon/encrypted_store'
 require 'rails'
+require 'rails/generators'
 
 module Ribbon
   module EncryptedStore
@@ -10,6 +11,12 @@ module Ribbon
         Dir[
           File.expand_path("../../../tasks", __FILE__) + '/**/*.rake'
         ].each { |rake_file| load rake_file }
+      end
+
+      generators do
+        Dir[
+          File.expand_path("../../../generators", __FILE__) + '/**/*.rb'
+        ].each { |generator| require generator }
       end
     end # Railtie
   end # EncryptedStore
