@@ -9,6 +9,14 @@ module Ribbon::EncryptedStore
       merge!(data)
     end
 
+    ##
+    # Encrypts the hash using the data encryption key and salt.
+    # Returns a blob:
+    #
+    # | Byte 0   |   Byte 1    | Bytes 2...S | Bytes S+1...E  | Bytes E+1..E+4 |
+    # --------------------------------------------------------------------------
+    # | Version  | Salt Length |     Salt    | Encrypted Data |     CRC32      |
+    #
     def encrypt(dek, salt)
       return nil if empty?
       raise Errors::SaltTooBigError if salt.bytes.length > 255
@@ -19,12 +27,6 @@ module Ribbon::EncryptedStore
       encryptor.key = key
       encryptor.iv = iv
 
-      # Packet Header Format (Version 1)
-      #
-      # |     Byte 0     |     Byte 1     |      ...
-      #  ---------------------------------------------------
-      # |    Version     |   Salt Length  |     Salt
-      #
       data_packet = _encrypted_data_header(salt) + encryptor.update(self.to_json) + encryptor.final
       _append_crc32(data_packet)
     end
@@ -90,7 +92,13 @@ module Ribbon::EncryptedStore
     end # Class Methods
 
     private
-
+    
+    ##
+    # Generates the encrypted data header:
+    # |     Byte 0     |     Byte 1     |  Bytes 2...S
+    # ---------------------------------------------------
+    # |    Version     |   Salt Length  |     Salt
+    #
     def _encrypted_data_header(salt)
       "\x01" + salt.bytes.length.chr + salt
     end
