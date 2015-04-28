@@ -54,13 +54,8 @@ module Ribbon::EncryptedStore
       end
 
       def _keyiv_gen(key, salt)
-        key_and_iv = OpenSSL::PKCS5.pbkdf2_hmac(
-          key,
-          salt,
-          4096,
-          48,
-          OpenSSL::Digest::SHA256.new
-        )
+        digest = OpenSSL::Digest::SHA256.new
+        key_and_iv = OpenSSL::PKCS5.pbkdf2_hmac(key, salt, 4096, 48, digest)
 
         key = key_and_iv[0..31]
         iv  = key_and_iv[32..-1]
@@ -92,7 +87,7 @@ module Ribbon::EncryptedStore
     end # Class Methods
 
     private
-    
+
     ##
     # Generates the encrypted data header:
     # |     Byte 0     |     Byte 1     |  Bytes 2...S
