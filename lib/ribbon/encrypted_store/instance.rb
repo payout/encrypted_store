@@ -8,12 +8,12 @@ module Ribbon::EncryptedStore
       }
     end
 
-    def decrypt_key(*args)
-      config.decrypt_key? ? config.decrypt_key.last.call(*args) : args
+    def decrypt_key(dek, primary=false)
+      config.decrypt_key? ? config.decrypt_key.last.call(dek, primary) : dek
     end
 
-    def encrypt_key(*args)
-      config.encrypt_key? ? config.decrypt_key.last.call(*args) : args
+    def encrypt_key(dek, primary=false)
+      config.encrypt_key? ? config.encrypt_key.last.call(dek, primary) : dek
     end
   end # Instance
 end # Ribbon::EncryptedStore
