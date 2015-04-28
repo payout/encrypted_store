@@ -9,6 +9,7 @@ module Ribbon::EncryptedStore
       class << self
         def included(base)
           base.before_save(:_encrypted_store_save)
+          base.belongs_to(:encryption_key, class_name: EncryptionKey.name)
           base.extend(ClassMethods)
         end
       end # Module Methods
@@ -33,13 +34,9 @@ module Ribbon::EncryptedStore
       # Instance Methods
       ##
       def reencrypt(encryption_key)
-        ActiveRecord::Base.transaction {
-          self.lock!
-          _crypto_hash
-          self._encryption_key_id = encryption_key.id
-          attribute_will_change!(_encrypted_store_data[:encrypted_attributes].first)
-          _encrypted_store_save
-        }
+        _crypto_hash
+        self.encryption_key = encryption_key
+        @_reencrypting = true
       end
 
       def reencrypt!(encryption_key)
@@ -51,20 +48,11 @@ module Ribbon::EncryptedStore
       end
 
       def _encryption_key
-        # Encrypt new data with the primary encryption key
-        EncryptedStore.decrypt_key(EncryptionKey.find(_encryption_key_id).dek)
-      end
-
-      def _encryption_key_id
-        @__encryption_key_id ||= self['encryption_key_id'] || EncryptionKey.primary_encryption_key.id
-      end
-
-      def _encryption_key_id=(key_id)
-        @__encryption_key_id = key_id
+        self.encryption_key ||= EncryptionKey.primary_encryption_key
       end
 
       def _crypto_hash
-        @_crypto_hash ||= CryptoHash.decrypt(_encryption_key, self['encrypted_store'])
+        @_crypto_hash ||= CryptoHash.decrypt(_encryption_key.decrypted_key, self.encrypted_store)
       end
 
       def _encrypted_store_get(field)
@@ -77,9 +65,16 @@ module Ribbon::EncryptedStore
       end
 
       def _encrypted_store_save
-        if !(self.changed & _encrypted_store_data[:encrypted_attributes]).empty?
-          self['encryption_key_id'] = _encryption_key_id
-          self['encrypted_store'] = _crypto_hash.encrypt(_encryption_key, EncryptionKeySalt.generate_salt(_encryption_key_id))
+        if !(self.changed & _encrypted_store_data[:encrypted_attributes]).empty? || @_reencrypting
+          # Obtain a lock without overriding attribute values for this record.
+          record = self.class.unscoped { self.class.lock.find(id) } unless new_record?
+
+          unless @_reencrypting
+            self.encryption_key = record.encryption_key if record && record.encryption_key
+          end
+
+          @_reencrypting = false
+          self.encrypted_store = self.encryption_key.encrypt(_crypto_hash)
         end
       end
     end # ActiveRecordMixin

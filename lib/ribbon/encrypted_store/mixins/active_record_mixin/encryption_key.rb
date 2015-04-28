@@ -57,8 +57,16 @@ module Ribbon::EncryptedStore
           end
         end # Class Methods
 
+        def encrypt(store)
+          store.encrypt(decrypted_key, generate_salt)
+        end
+
         def generate_salt
           EncryptionKeySalt.generate_salt(self.id)
+        end
+
+        def decrypted_key
+          EncryptedStore.decrypt_key(self.dek, self.primary)
         end
       end # EncryptionKey
     end # ActiveRecordMixin
