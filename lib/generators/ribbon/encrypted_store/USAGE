@@ -1,0 +1,10 @@
+Description:
+    Explain the generator
+
+Example:
+    rails generate encrypted_store:install --tables
+
+    Creates initializer and migrations for encryption_keys and encryption_key_salts tables:
+        config/initializers/encrypted_store.rb
+        migrations/create_encryption_keys.rb
+        migrations/create_encryption_key_salts.rb
