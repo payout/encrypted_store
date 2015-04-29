@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.description = s.summary
   s.authors     = ["Robert Honer", "Kayvon Ghaffari"]
   s.email       = ['robert@ribbonpayments.com', 'kayvon@ribbonpayments.com']
-  s.files       = Dir['lib/**/*.rb'] + Dir['lib/tasks/**/*.rake']
+  s.files       = Dir['lib/**/*.rb'] + Dir['lib/tasks/**/*.rake'] + Dir['lib/generators/**/*.rb']
 
   s.add_dependency 'bcrypt', '~> 3.1.3', '>= 3.1.3'
   s.add_dependency 'ribbon-config', '~> 0.1.0'
