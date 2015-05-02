@@ -1,6 +1,5 @@
 namespace :test do
-  task :setup_database => :environment do |t, args|
-    Rake::Task["db:create"].invoke
-    Rake::Task["db:migrate"].invoke
-  end
+  ENV['RAIL_ENV'] = 'test'
+  task :setup_database => ["db:create", "db:migrate"]
+  task :setup => ['test:setup_database']
 end
