@@ -55,15 +55,3 @@ module Ribbon::EncryptedStore
     end # generators
   end # Railtie
 end # Ribbon::EncryptedStore
-
-+  # This is displayed when users are on mobile
-+  def _generate_fallback(type)
-+    return 'Monthly tokenizations trend' if type == :tokenizations
-+    return 'Monthly credits trend' if type == :credits
-+    return 'Monthly credit failure rate trend' if type == :credit_failure_rate
-+    return 'Monthly card coverage trend' if type == :card_coverage
-+  end
-
-def _generate_fallback(type)
-  case type
-end
