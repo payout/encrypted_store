@@ -1,13 +1,12 @@
 *.rbc
 capybara-*.html
-.rspec
 /log
 /tmp
 /db/*.sqlite3
-/db/*.sqlite3-journal
 /public/system
 /coverage/
 /spec/tmp
+/spec/dummy/log/*.log
 **.orig
 rerun.txt
 pickle-email-*.html
@@ -30,6 +29,3 @@ config/secrets.yml
 /vendor/assets/bower_components
 *.bowerrc
 bower.json
-
-# Ignore pow environment settings
-.powenv

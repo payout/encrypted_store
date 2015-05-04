@@ -1,0 +1,10 @@
+encrypt_table
+
+Description:
+    Adds necessary encrypted_store columns to the specified table name
+
+Example:
+    rails generate encrypt_table my_table_name
+
+    Creates migration for adding the encryption_key_id and encrypted_store columns
+        migrations/add_encrypted_store_to_my_table_name.rb
