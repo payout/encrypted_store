@@ -8,8 +8,8 @@ module Ribbon::EncryptedStore
       }
     end
 
-    def decrypt_key(dek, primary=false)
-      config.decrypt_key? ? config.decrypt_key.last.call(dek, primary) : dek
+    def decrypt_key(key_id, dek, primary=false)
+      (@__decrypted_key ||= {})[key_id] ||= config.decrypt_key? ? config.decrypt_key.last.call(dek, primary) : dek
     end
 
     def encrypt_key(dek, primary=false)

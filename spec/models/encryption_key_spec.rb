@@ -103,7 +103,7 @@ module Ribbon::EncryptedStore
               end
             end
 
-            context 'with empty key_id array', :test do
+            context 'with empty key_id array' do
               let(:key_ids) { [] }
               it 'should retire all records' do
                 expect(DummyModel.find(dummy_record.id).encryption_key_id).to eq new_key.id
