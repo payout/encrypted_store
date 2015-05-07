@@ -18,7 +18,7 @@ module Ribbon::EncryptedStore
 
             transaction {
               _has_primary? && where(primary: true).first.update_attributes(primary: false)
-              create!(dek: dek, primary: true)
+              create!(dek: EncryptedStore.encrypt_key(dek, true), primary: true)
             }
           end
 
@@ -62,7 +62,7 @@ module Ribbon::EncryptedStore
         end
 
         def decrypted_key
-          EncryptedStore.decrypt_key(self.dek, self.primary)
+          EncryptedStore.decrypt_key(self.id, self.dek, self.primary)
         end
       end # EncryptionKey
     end # ActiveRecordMixin
