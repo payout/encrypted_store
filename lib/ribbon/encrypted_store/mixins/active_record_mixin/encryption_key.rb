@@ -18,7 +18,7 @@ module Ribbon::EncryptedStore
 
             transaction {
               _has_primary? && where(primary: true).first.update_attributes(primary: false)
-              create!(dek: dek, primary: true)
+              create!(dek: EncryptedStore.encrypt_key(dek, true), primary: true)
             }
           end
 
@@ -52,14 +52,6 @@ module Ribbon::EncryptedStore
             _get_table_models.select { |model| model < Mixins::ActiveRecordMixin }
           end
         end # Class Methods
-
-        def encrypt(store)
-          store.encrypt(decrypted_key, generate_salt)
-        end
-
-        def generate_salt
-          EncryptionKeySalt.generate_salt(self.id)
-        end
 
         def decrypted_key
           EncryptedStore.decrypt_key(self.dek, self.primary)

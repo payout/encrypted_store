@@ -9,7 +9,6 @@ module Ribbon::EncryptedStore
       class << self
         def included(base)
           base.before_save(:_encrypted_store_save)
-          base.belongs_to(:encryption_key, class_name: EncryptionKey.name)
           base.extend(ClassMethods)
         end
       end # Module Methods
@@ -35,7 +34,7 @@ module Ribbon::EncryptedStore
       ##
       def reencrypt(encryption_key)
         _crypto_hash
-        self.encryption_key = encryption_key
+        self.encryption_key_id = encryption_key.id
         @_reencrypting = true
       end
 
@@ -47,12 +46,16 @@ module Ribbon::EncryptedStore
         self.class._encrypted_store_data
       end
 
-      def _encryption_key
-        self.encryption_key ||= EncryptionKey.primary_encryption_key
+      def _encryption_key_id
+        self.encryption_key_id ||= EncryptionKey.primary_encryption_key.id
       end
 
       def _crypto_hash
-        @_crypto_hash ||= CryptoHash.decrypt(_encryption_key.decrypted_key, self.encrypted_store)
+        @_crypto_hash ||= CryptoHash.decrypt(_decrypted_key, self.encrypted_store)
+      end
+
+      def _decrypted_key
+        EncryptedStore.retrieve_dek(EncryptionKey, _encryption_key_id)
       end
 
       def _encrypted_store_get(field)
@@ -70,11 +73,11 @@ module Ribbon::EncryptedStore
           record = self.class.unscoped { self.class.lock.find(id) } unless new_record?
 
           unless @_reencrypting
-            self.encryption_key = record.encryption_key if record && record.encryption_key
+            self.encryption_key_id = record.encryption_key_id if record && record.encryption_key_id
           end
 
           @_reencrypting = false
-          self.encrypted_store = self.encryption_key.encrypt(_crypto_hash)
+          self.encrypted_store = _crypto_hash.encrypt(_decrypted_key, EncryptionKeySalt.generate_salt(_encryption_key_id))
         end
       end
     end # ActiveRecordMixin
