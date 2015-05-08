@@ -7,37 +7,13 @@ module Ribbon
         context 'with decrypt_key config set' do
           it 'should call decrypt_key proc' do
             instance.config { |c| c.decrypt_key { |dek, primary| dek + "def" } }
-            expect(instance.decrypt_key(1, "abc", true)).to eq "abcdef"
+            expect(instance.decrypt_key("abc", true)).to eq "abcdef"
           end
-
-          context 'cached decrypted key' do
-            before {
-              instance.config { |c|
-                c.decrypt_key { |dek, primary|
-                  @counter ||= 0
-                  key = dek + "world #{@counter}"
-                  @counter += 1
-                  key
-                }
-              }
-            }
-
-            it 'should cache the decrypted key for each encryption key record' do
-              expect(instance.decrypt_key(1, "hello", true)).to eq "helloworld 0"
-              expect(instance.decrypt_key(1, "hello", true)).to eq "helloworld 0"
-            end
-
-            it 'should decrypt new keys using the config method' do
-              expect(instance.decrypt_key(1, "hello", true)).to eq "helloworld 0"
-              expect(instance.decrypt_key(2, "hello", true)).to eq "helloworld 1"
-              expect(instance.decrypt_key(2, "hello", true)).to eq "helloworld 1"
-            end
-          end # cached decrypted key
         end # with decrypt_key config set
 
         context 'without decrypt_key config' do
           it 'should default to args passed in' do
-            expect(instance.decrypt_key(1, "abc", true)).to eq "abc"
+            expect(instance.decrypt_key("abc", true)).to eq "abc"
           end
         end # without decrypt_key config
       end # #decrypt_key
@@ -57,5 +33,26 @@ module Ribbon
         end # without encrypt_key config
       end # #encrypt_key
     end # #config
+
+    describe '#retrieve_dek' do
+      let(:key_model) {
+        double('key model').tap { |m|
+          allow(m).to receive(:find) { key_model_instance }
+        }
+      }
+
+      let(:key_model_instance) {
+        double('key model instance').tap { |i|
+          allow(i).to receive(:decrypted_key) { 'truthy' }
+        }
+      }
+
+      it 'should only call decrypted_key once', :test do
+        expect(key_model_instance).to receive(:decrypted_key).once
+        instance.retrieve_dek(key_model, 1)
+        instance.retrieve_dek(key_model, 1)
+        instance.retrieve_dek(key_model, 1)
+      end
+    end # #retrieve_dek
   end # EncryptedStore
 end # Ribbon::EncryptedStore

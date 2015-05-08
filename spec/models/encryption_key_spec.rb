@@ -190,18 +190,6 @@ module Ribbon::EncryptedStore
             expect(DummyModel.find(dummy_record_2.id).encryption_key_id).not_to eq dummy_record_2.encryption_key_id
           end
         end # #rotate_keys
-
-        describe '#generate_salt' do
-          let(:encryption_key) { EncryptionKey.new_key }
-          subject { encryption_key.generate_salt }
-
-          it { is_expected.to be_a String }
-
-          it 'should create a new EncryptionKeySalt record' do
-            expect(subject).to eq EncryptionKeySalt.last.salt
-            expect(EncryptionKeySalt.last.encryption_key_id).to eq encryption_key.id
-          end
-        end # #generate_salt
       end # EncryptionKey
     end # ActiveRecordMixin
   end # Mixins
