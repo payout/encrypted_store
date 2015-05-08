@@ -47,7 +47,7 @@ module Ribbon
         }
       }
 
-      it 'should only call decrypted_key once', :test do
+      it 'should only call decrypted_key once' do
         expect(key_model_instance).to receive(:decrypted_key).once
         instance.retrieve_dek(key_model, 1)
         instance.retrieve_dek(key_model, 1)
