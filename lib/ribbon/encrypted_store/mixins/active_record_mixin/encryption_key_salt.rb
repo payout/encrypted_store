@@ -11,7 +11,10 @@ module Ribbon::EncryptedStore
             loop do
               salt = SecureRandom.random_bytes(16)
               begin
-                create!(encryption_key_id: encryption_key_id, salt: salt)
+                salt_record = self.new
+                salt_record.encryption_key_id = encryption_key_id
+                salt_record.salt = salt
+                salt_record.save!
                 return salt
               rescue ActiveRecord::RecordNotUnique => e
                 next
