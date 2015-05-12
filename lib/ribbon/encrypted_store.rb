@@ -17,17 +17,15 @@ module Ribbon
           raise Errors::UnsupportedModelError
         end
       end
+
+      def method_missing(meth, *args, &block)
+        instance.send(meth, *args, &block)
+      end
+
+      def instance
+        @__instance ||= Instance.new
+      end
     end # Class Methods
-
-    module_function
-
-    def method_missing(meth, *args, &block)
-      instance.send(meth, *args, &block)
-    end
-
-    def instance
-      @__instance ||= Instance.new
-    end
   end # EncryptedStore
 end # Ribbon
 
