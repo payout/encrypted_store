@@ -2,6 +2,17 @@ module Ribbon
   RSpec.describe EncryptedStore do
     let(:instance) { EncryptedStore::Instance.new }
 
+    describe "mixing in" do
+      subject { DummyModel.new }
+
+      ##
+      # Github Issue #10
+      it 'should raise Dummy Model method_missing error' do
+        # This should say NoMethodError from DummyModel and not the Instance class
+        expect { subject.nonexistent_method }.to raise_error NoMethodError, /undefined method `nonexistent_method' for #<DummyModel/
+      end
+    end # mixing in
+
     describe '#config' do
       describe '#decrypt_key' do
         context 'with decrypt_key config set' do
