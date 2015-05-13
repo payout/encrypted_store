@@ -8,7 +8,8 @@ module Ribbon
       ##
       # Github Issue #10
       it 'should raise Dummy Model method_missing error' do
-        expect { subject.missing_method }.to raise_error NoMethodError, /undefined method `missing_method' for #<DummyModel/
+        # This should say NoMethodError from DummyModel and not the Instance class
+        expect { subject.nonexistent_method }.to raise_error NoMethodError, /undefined method `nonexistent_method' for #<DummyModel/
       end
     end # mixing in
 
