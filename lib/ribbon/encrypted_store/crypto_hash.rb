@@ -5,7 +5,7 @@ require 'zlib'
 module Ribbon::EncryptedStore
   class CryptoHash < Hash
     def initialize(data={})
-      super
+      super()
       merge!(data)
     end
 

@@ -14,12 +14,24 @@ module Ribbon::EncryptedStore
         let(:data) { {test: 1} }
 
         it { is_expected.to eq({test: 1}) }
+
+        ##
+        # For issue#13
+        it 'should return nil for undefined keys' do
+          expect(subject[:undefined_key]).to be nil
+        end
       end # with some data
 
       context 'without data' do
         let(:hash) { CryptoHash.new }
 
         it { is_expected.to eq({}) }
+
+        ##
+        # For issue#13
+        it 'should return nil for undefined keys' do
+          expect(subject[:undefined_key]).to be nil
+        end
       end # without data
     end # #intialize
 
