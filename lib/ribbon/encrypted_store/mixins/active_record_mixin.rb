@@ -11,6 +11,21 @@ module Ribbon::EncryptedStore
           base.before_save(:_encrypted_store_save)
           base.extend(ClassMethods)
         end
+
+        def descendants
+          Rails.application.eager_load! if defined?(Rails) && Rails.application
+          ActiveRecord::Base.descendants.select { |model| model < Mixins::ActiveRecordMixin }
+        end
+
+        def descendants?
+          !descendants.empty?
+        end
+
+        ##
+        # Preloads the most recent `amount` keys.
+        def preload_keys(amount)
+          EncryptionKey.preload(amount) if descendants?
+        end
       end # Module Methods
 
       module ClassMethods

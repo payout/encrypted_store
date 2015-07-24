@@ -8,6 +8,13 @@ module Ribbon::EncryptedStore
       }
     end
 
+    ##
+    # Preloads the most recent `amount` keys.
+    def preload_keys(amount=12)
+      keys = Mixins::ActiveRecordMixin.preload_keys(amount)
+      keys.each { |k| (@_decrypted_keys ||= {})[k.id] = k.decrypted_key }
+    end
+
     def decrypt_key(dek, primary=false)
       config.decrypt_key? ? config.decrypt_key.last.call(dek, primary) : dek
     end
@@ -17,7 +24,7 @@ module Ribbon::EncryptedStore
     end
 
     def retrieve_dek(key_model, key_id)
-      (@__decrypted_keys ||= {})[key_id] ||= key_model.find(key_id).decrypted_key
+      (@_decrypted_keys ||= {})[key_id] ||= key_model.find(key_id).decrypted_key
     end
   end # Instance
 end # Ribbon::EncryptedStore

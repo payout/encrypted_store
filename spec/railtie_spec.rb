@@ -43,13 +43,13 @@ module Ribbon::EncryptedStore
     describe 'generators', :type => :generator do
       describe 'install_encrypted_store' do
         it 'should be defined' do
-          expect(Rails::Generators.subclasses).to include InstallEncryptedStoreGenerator
+          expect(Rails::Generators.subclasses).to include Generators::InstallGenerator
         end
       end # install_encrypted_store
 
       describe 'encrypt_table' do
         it 'should be defined' do
-          expect(Rails::Generators.subclasses).to include EncryptTableGenerator
+          expect(Rails::Generators.subclasses).to include Generators::EncryptTableGenerator
         end
       end # encrypt_table
     end # generators
