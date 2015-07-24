@@ -4,9 +4,9 @@ Description:
     Sets up the encrypted_store initializer and necessary tables
 
 Example:
-    rails generate install_encrypted_store
+    rails generate ribbon:encrypted_store:install
 
     Creates initializer and migrations for encryption_keys and encryption_key_salts tables:
         config/initializers/encrypted_store.rb
-        migrations/create_encryption_keys.rb
-        migrations/create_encryption_key_salts.rb
+        db/migrate/create_encryption_keys.rb
+        db/migrate/create_encryption_key_salts.rb

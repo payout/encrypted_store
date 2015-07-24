@@ -1,6 +1,6 @@
 require 'ribbon/encrypted_store'
 
-Ribbon::EncryptedStore.config { |c|
-  c.encrypt_key { |dek| dek }
-  c.decrypt_key { |dek| dek }
+Ribbon::EncryptedStore.config {
+  encrypt_key { |dek| dek }
+  decrypt_key { |dek| dek }
 }
