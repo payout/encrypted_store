@@ -1,4 +1,4 @@
-install_encrypted_store
+ribbon:encrypted_store:install
 
 Description:
     Sets up the encrypted_store initializer and necessary tables
