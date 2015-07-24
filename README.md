@@ -1,5 +1,5 @@
 # ribbon-encrypted_store
-A gem for encrypting data securily in a Ruby app.
+We use this gem for encrypting all of our sensitive data at Ribbon. This includes cardholder data and meets the necessary requirements for PCI DSS 3.0.
 
 ## Installation
 Add the gem to your `Gemfile`.
@@ -16,3 +16,5 @@ Run the new database migrations. This will add the `encryption_keys` and `encryp
 ```
 $ rake db:migrate
 ```
+
+## Configuration
