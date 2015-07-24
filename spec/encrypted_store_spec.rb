@@ -65,5 +65,15 @@ module Ribbon
         instance.retrieve_dek(key_model, 1)
       end
     end # #retrieve_dek
+
+    describe '#preload_keys', :preload_keys do
+      before { instance.preload_keys(1) }
+      subject { instance.instance_variable_get(:@_decrypted_keys) }
+
+      let(:primary_key) { EncryptedStore::Mixins::ActiveRecordMixin::EncryptionKey.primary_encryption_key }
+      let(:expected_keys) { { primary_key.id => primary_key.decrypted_key } }
+
+      it { is_expected.to eq expected_keys }
+    end # #preload_keys
   end # EncryptedStore
 end # Ribbon::EncryptedStore

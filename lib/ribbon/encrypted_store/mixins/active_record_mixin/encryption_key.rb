@@ -25,13 +25,20 @@ module Ribbon::EncryptedStore
           def retire_keys(key_ids=[])
             pkey = primary_encryption_key
 
-            _get_models_with_encrypted_store.each { |model|
+            ActiveRecordMixin.descendants.each { |model|
               records = key_ids.empty? ? model.where("encryption_key_id != ?", pkey.id)
                                        : model.where("encryption_key_id IN (?)", key_ids)
               records.each { |record| record.reencrypt!(pkey) }
             }
 
             pkey
+          end
+
+          ##
+          # Preload the most recent `amount` keys.
+          def preload(amount)
+            primary_encryption_key # Ensure there's at least a primary key
+            order(:created_at).limit(amount)
           end
 
           def rotate_keys
