@@ -4,8 +4,8 @@ module Ribbon::EncryptedStore
       describe '#attr_encrypted' do
         let(:dummy_record) { DummyModel.new }
 
-        it 'should set the args in encrypted_store_data' do
-          expect(DummyModel._encrypted_store_data).to eq(encrypted_attributes: [:name, :age])
+        it 'should set the args (as symbols) in encrypted_store_data' do
+          expect(DummyModel._encrypted_store_data).to eq(encrypted_attributes: [:name, :age, :username])
         end
 
         it 'should create setters and getters for each arg' do
