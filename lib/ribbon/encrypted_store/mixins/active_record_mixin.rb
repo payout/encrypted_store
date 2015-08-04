@@ -35,7 +35,7 @@ module Ribbon::EncryptedStore
 
         def attr_encrypted(*args)
           # Store attrs in class data
-          _encrypted_store_data[:encrypted_attributes] = args
+          _encrypted_store_data[:encrypted_attributes] = args.map(&:to_sym)
 
           args.each { |arg|
             define_method(arg) { _encrypted_store_get(arg) }
@@ -83,7 +83,7 @@ module Ribbon::EncryptedStore
       end
 
       def _encrypted_store_save
-        if !(self.changed & _encrypted_store_data[:encrypted_attributes]).empty? || @_reencrypting
+        if !(self.changed.map(&:to_sym) & _encrypted_store_data[:encrypted_attributes]).empty? || @_reencrypting
           # Obtain a lock without overriding attribute values for this record.
           record = self.class.unscoped { self.class.lock.find(id) } unless new_record?
 
