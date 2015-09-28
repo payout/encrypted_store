@@ -18,7 +18,7 @@ module Ribbon::EncryptedStore
     # | Version  | Salt Length | Iteration Magnitude |     Salt    | Encrypted Data |     CRC32      |
     def encrypt(dek, salt, iter_mag=10)
       return nil if empty?
-      raise Errors::SaltTooBigError if salt.bytes.length > 255
+      raise Errors::InvalidSaltSize, 'too long' if salt.bytes.length > 255
 
       key, iv = _keyiv_gen(dek, salt, iter_mag)
 
@@ -47,11 +47,17 @@ module Ribbon::EncryptedStore
       end
 
       def _keyiv_gen(key, salt, iter_mag)
-        digest = OpenSSL::Digest::SHA256.new
-        key_and_iv = OpenSSL::PKCS5.pbkdf2_hmac(key, salt, 1 << iter_mag, 48, digest)
+        if iter_mag == -1
+          raise Errors::InvalidKeySize, 'must be exactly 256 bits' unless key.bytes.length == 32
+          raise Errors::InvalidSaltSize, 'must be exactly 128 bits' unless salt.bytes.length == 16
+          iv = salt
+        else
+          digest = OpenSSL::Digest::SHA256.new
+          key_and_iv = OpenSSL::PKCS5.pbkdf2_hmac(key, salt, 1 << iter_mag, 48, digest)
 
-        key = key_and_iv[0..31]
-        iv  = key_and_iv[32..-1]
+          key = key_and_iv[0..31]
+          iv  = key_and_iv[32..-1]
+        end
 
         [key, iv]
       end
@@ -88,7 +94,7 @@ module Ribbon::EncryptedStore
       def _split_binary_data_v2(encrypted_data)
         bytes = encrypted_data.bytes
         salt_length = bytes[1]
-        iter_mag    = bytes[2]
+        iter_mag    = bytes[2].chr.unpack('c').first
 
         salt_start_index = 3
         salt_end_index   = salt_start_index + salt_length - 1
@@ -126,7 +132,7 @@ module Ribbon::EncryptedStore
     # |    Version     |   Salt Length  |  Iteration Magnitude |    Salt
     #
     def _encrypted_data_header_v2(salt, iter_mag)
-      "\x02" + salt.bytes.length.chr + iter_mag.chr + salt
+      "\x02" + salt.bytes.length.chr + [iter_mag].pack('c') + salt
     end
 
     def _keyiv_gen(key, salt, iter_mag)

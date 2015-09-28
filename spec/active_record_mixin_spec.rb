@@ -60,7 +60,7 @@ module Ribbon::EncryptedStore
           end
         end # without iteration_magnitude config
 
-        context 'with iteration_magnitude config set', :test do
+        context 'with iteration_magnitude config set' do
           let(:iter_mag) { 2 }
 
           before {

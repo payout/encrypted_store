@@ -9,7 +9,8 @@ module Ribbon::EncryptedStore
     # CryptoHash Errors
     class CryptoHashError < Error; end
     class ChecksumFailedError < CryptoHashError; end
-    class SaltTooBigError < CryptoHashError; end
+    class InvalidSaltSize < CryptoHashError; end
+    class InvalidKeySize < CryptoHashError; end
     class UnsupportedVersionError < CryptoHashError; end
   end # Errors
 end # Ribbon::EncryptedStore
