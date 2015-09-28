@@ -55,8 +55,9 @@ module Ribbon::EncryptedStore
         end # with attributes changed
 
         context 'without iteration_magnitude config' do
-          it 'should use a magnitude of 10' do
-            expect(subject.encrypted_store.bytes[2]).to eq 10
+          it 'should use a magnitude of -1' do
+            # 255 is -1 as a signed byte.
+            expect(subject.encrypted_store.bytes[2]).to eq 255
           end
         end # without iteration_magnitude config
 

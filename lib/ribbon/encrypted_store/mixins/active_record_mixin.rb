@@ -93,7 +93,7 @@ module Ribbon::EncryptedStore
 
           iter_mag = Ribbon::EncryptedStore.config.iteration_magnitude? ?
                      Ribbon::EncryptedStore.config.iteration_magnitude  :
-                     10
+                     -1
 
           @_reencrypting = false
           self.encrypted_store = _crypto_hash.encrypt(
