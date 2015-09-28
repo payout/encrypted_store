@@ -147,22 +147,38 @@ module Ribbon::EncryptedStore
       context 'with valid salt' do
         context 'empty hash' do
           let(:data) { {} }
-
           it { is_expected.to eq data }
         end # empty hash
 
         context 'with 1 field' do
           let(:data) { {test: 1} }
-
           it { is_expected.to eq data }
         end # with 1 field
 
         context 'with multiple fields' do
           let(:data) { {test: 1, another: "hello"} }
-
           it { is_expected.to eq data }
         end # with multiple fields
       end # with valid salt
+
+      context 'with v1 data' do
+        let(:encrypted_data) { "\x01\x0Eversion 1 salt\x83/\xF6T\x8D6\x1E\xA3n\xB7!\xED)\xCC\xAF\x15\x9E\xA9\x13d\x05\xBA\x05\xFE\\\xD4/Ck\x91\xE0{\xB4\x01K\xEE" }
+        let(:dek) { 'version 1 key' }
+        let(:salt) { 'version 1 salt' }
+        it { is_expected.to eq(encrypted: "using version 1") }
+      end # with v1 data
+
+      context 'with v2 data' do
+        let(:encrypted_data) { "\x02\x0E\rversion 2 salt\xAC\x83\xFD2\xB9\x01Le\xA1\xAE\x16\x02\xED\n\xFD\xFC\xB6?\xAC\xDB\xDA\xB8C\x90\xD3\xCB\xA8G\x05W\xF7\x16\xBB\xCD\xD8E" }
+        let(:dek) { 'version 2 key' }
+        let(:salt) { 'version 2 salt' }
+        it { is_expected.to eq(encrypted: "using version 2") }
+      end # with v2 data
+
+      context 'with unsupported version' do
+        let(:encrypted_data) { "\xFF" }
+        it { expect { subject }.to raise_error Errors::UnsupportedVersionError, "Unsupported encrypted data version: 255" }
+      end # with unsupported version
     end # #decrypt
   end # CryptoHash
 end # Ribbon::EncryptedStore

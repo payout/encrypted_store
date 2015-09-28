@@ -25,13 +25,8 @@ module Ribbon::EncryptedStore
       end
 
       describe 'saving' do
-        let(:dummy_record) { DummyModel.new }
-        before {
-          dummy_record.name = "test"
-          dummy_record.age = 12
-          dummy_record.save
-        }
-        subject { dummy_record }
+        let(:dummy_record) { DummyModel.new(name: 'test', age: 12) }
+        subject { dummy_record.tap { |d| d.save! } }
 
         context 'with attributes changed' do
           before {
@@ -58,6 +53,28 @@ module Ribbon::EncryptedStore
             end
           end # without calling save
         end # with attributes changed
+
+        context 'without iteration_magnitude config' do
+          it 'should use a magnitude of 10' do
+            expect(subject.encrypted_store.bytes[2]).to eq 10
+          end
+        end # without iteration_magnitude config
+
+        context 'with iteration_magnitude config set', :test do
+          let(:iter_mag) { 2 }
+
+          before {
+            Ribbon::EncryptedStore.config.iteration_magnitude = iter_mag
+          }
+
+          after {
+            Ribbon::EncryptedStore.config.iteration_magnitude = nil
+          }
+
+          it "should use the configured magnitude" do
+            expect(subject.encrypted_store.bytes[2]).to eq iter_mag
+          end
+        end # with iteration_magnitude config set
       end # saving
 
       describe '#reencrypt' do

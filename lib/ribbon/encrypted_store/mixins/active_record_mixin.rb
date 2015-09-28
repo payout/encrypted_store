@@ -91,8 +91,16 @@ module Ribbon::EncryptedStore
             self.encryption_key_id = record.encryption_key_id if record && record.encryption_key_id
           end
 
+          iter_mag = Ribbon::EncryptedStore.config.iteration_magnitude? ?
+                     Ribbon::EncryptedStore.config.iteration_magnitude  :
+                     10
+
           @_reencrypting = false
-          self.encrypted_store = _crypto_hash.encrypt(_decrypted_key, EncryptionKeySalt.generate_salt(_encryption_key_id))
+          self.encrypted_store = _crypto_hash.encrypt(
+            _decrypted_key,
+            EncryptionKeySalt.generate_salt(_encryption_key_id),
+            iter_mag
+          )
         end
       end
     end # ActiveRecordMixin
