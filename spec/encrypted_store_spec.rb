@@ -74,4 +74,9 @@ RSpec.describe EncryptedStore do
 
     it { is_expected.to eq expected_keys }
   end # #preload_keys
+
+  describe '#rotate_keys', :rotate_keys do
+    subject { instance.rotate_keys }
+    it { expect { subject }.not_to raise_error }
+  end # #rotate_keys
 end # EncryptedStore

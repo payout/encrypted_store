@@ -8,6 +8,10 @@ module EncryptedStore
       }
     end
 
+    def rotate_keys
+      EncryptedStore::Mixins::ActiveRecordMixin::EncryptionKey.rotate_keys
+    end
+
     ##
     # Preloads the most recent `amount` keys.
     def preload_keys(amount=12)
