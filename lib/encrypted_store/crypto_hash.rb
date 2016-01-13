@@ -2,7 +2,7 @@ require 'openssl'
 require 'json'
 require 'zlib'
 
-module Ribbon::EncryptedStore
+module EncryptedStore
   class CryptoHash < Hash
     def initialize(data={})
       super()
@@ -147,4 +147,4 @@ module Ribbon::EncryptedStore
       self.class._calc_crc32(data)
     end
   end # CryptoHash
-end # Ribbon::EncryptedStore
+end # EncryptedStore

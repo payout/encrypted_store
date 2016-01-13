@@ -1,10 +1,10 @@
 require 'securerandom'
 
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Mixins
     module ActiveRecordMixin
-      autoload(:EncryptionKeySalt, 'ribbon/encrypted_store/mixins/active_record_mixin/encryption_key_salt')
-      autoload(:EncryptionKey,     'ribbon/encrypted_store/mixins/active_record_mixin/encryption_key')
+      autoload(:EncryptionKeySalt, 'encrypted_store/mixins/active_record_mixin/encryption_key_salt')
+      autoload(:EncryptionKey,     'encrypted_store/mixins/active_record_mixin/encryption_key')
 
       class << self
         def included(base)
@@ -91,8 +91,8 @@ module Ribbon::EncryptedStore
             self.encryption_key_id = record.encryption_key_id if record && record.encryption_key_id
           end
 
-          iter_mag = Ribbon::EncryptedStore.config.iteration_magnitude? ?
-                     Ribbon::EncryptedStore.config.iteration_magnitude  :
+          iter_mag = EncryptedStore.config.iteration_magnitude? ?
+                     EncryptedStore.config.iteration_magnitude  :
                      -1
 
           @_reencrypting = false
@@ -105,4 +105,4 @@ module Ribbon::EncryptedStore
       end
     end # ActiveRecordMixin
   end # Mixins
-end # Ribbon::EncryptedStore
+end # EncryptedStore

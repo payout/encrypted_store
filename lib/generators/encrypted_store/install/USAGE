@@ -1,10 +1,10 @@
-ribbon:encrypted_store:install
+encrypted_store:install
 
 Description:
     Sets up the encrypted_store initializer and necessary tables
 
 Example:
-    rails generate ribbon:encrypted_store:install
+    rails generate encrypted_store:install
 
     Creates initializer and migrations for encryption_keys and encryption_key_salts tables:
         config/initializers/encrypted_store.rb

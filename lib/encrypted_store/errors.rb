@@ -1,4 +1,4 @@
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Errors
     class Error < StandardError; end
 
@@ -13,4 +13,4 @@ module Ribbon::EncryptedStore
     class InvalidKeySize < CryptoHashError; end
     class UnsupportedVersionError < CryptoHashError; end
   end # Errors
-end # Ribbon::EncryptedStore
+end # EncryptedStore

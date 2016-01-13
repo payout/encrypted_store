@@ -1,7 +1,7 @@
-module Ribbon::EncryptedStore
+module EncryptedStore
   class Instance
     def config(&block)
-      (@__config ||= Ribbon::Config.new).tap { |config|
+      (@__config ||= Config.new).tap { |config|
         if block_given?
           config.define(&block)
         end
@@ -27,4 +27,4 @@ module Ribbon::EncryptedStore
       (@_decrypted_keys ||= {})[key_id] ||= key_model.find(key_id).decrypted_key
     end
   end # Instance
-end # Ribbon::EncryptedStore
+end # EncryptedStore

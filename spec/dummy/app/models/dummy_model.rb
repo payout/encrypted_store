@@ -1,4 +1,4 @@
-require 'ribbon/encrypted_store'
+require 'encrypted_store'
 
 class DummyModel < ActiveRecord::Base
   include EncryptedStore

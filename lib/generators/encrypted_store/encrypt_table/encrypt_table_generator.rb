@@ -1,4 +1,4 @@
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Generators
     class EncryptTableGenerator < Rails::Generators::Base
       source_root File.expand_path('../templates', __FILE__)
@@ -9,4 +9,4 @@ module Ribbon::EncryptedStore
       end
     end # EncryptTableGenerator
   end # Generators
-end # Ribbon::EncryptedStore
+end # EncryptedStore
