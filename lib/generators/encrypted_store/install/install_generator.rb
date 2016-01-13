@@ -1,6 +1,6 @@
 require 'rails/generators/active_record'
 
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Generators
     class InstallGenerator < Rails::Generators::Base
       include Rails::Generators::Migration
@@ -23,4 +23,4 @@ module Ribbon::EncryptedStore
       end
     end # InstallEncryptedStoreGenerator
   end # Generators
-end # Ribbon::EncryptedStore
+end # EncryptedStore

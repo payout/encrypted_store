@@ -1,6 +1,6 @@
 require 'rails/generators/active_record'
 
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Generators
     module Upgrade
       class ZeroOneFiveGenerator < Rails::Generators::Base
@@ -21,4 +21,4 @@ module Ribbon::EncryptedStore
       end # ZeroOneFiveGenerator
     end # Upgrade
   end # Generators
-end # Ribbon::EncryptedStore
+end # EncryptedStore

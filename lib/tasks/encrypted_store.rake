@@ -1,4 +1,4 @@
-require 'ribbon/encrypted_store'
+require 'encrypted_store'
 
 namespace :encrypted_store do
   task :new_key, [:custom_key] => :environment do |t, args|

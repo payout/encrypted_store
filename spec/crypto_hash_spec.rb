@@ -1,4 +1,4 @@
-module Ribbon::EncryptedStore
+module EncryptedStore
   RSpec.describe CryptoHash do
     let(:data) { {} }
     let(:hash) { CryptoHash.new(data) }
@@ -191,4 +191,4 @@ module Ribbon::EncryptedStore
       end # with unsupported version
     end # #decrypt
   end # CryptoHash
-end # Ribbon::EncryptedStore
+end # EncryptedStore

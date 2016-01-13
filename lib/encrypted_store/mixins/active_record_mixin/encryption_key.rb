@@ -1,7 +1,7 @@
 require 'securerandom'
 require 'base64'
 
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Mixins
     module ActiveRecordMixin
       class EncryptionKey < ActiveRecord::Base
@@ -74,4 +74,4 @@ module Ribbon::EncryptedStore
       end # EncryptionKey
     end # ActiveRecordMixin
   end # Mixins
-end # Ribbon::EncryptedStore
+end # EncryptedStore

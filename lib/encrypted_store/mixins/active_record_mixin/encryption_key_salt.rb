@@ -1,6 +1,6 @@
 require 'securerandom'
 
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Mixins
     module ActiveRecordMixin
       class EncryptionKeySalt < ActiveRecord::Base
@@ -25,4 +25,4 @@ module Ribbon::EncryptedStore
       end # EncryptionKeySalt
     end # ActiveRecordMixin
   end # Mixins
-end # Ribbon::EncryptedStore
+end # EncryptedStore

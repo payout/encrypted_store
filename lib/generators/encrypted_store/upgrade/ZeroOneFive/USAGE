@@ -1,10 +1,10 @@
-ribbon:encrypted_store:upgrade:zero_one_five
+encrypted_store:upgrade:zero_one_five
 
 Description:
     Upgrades tables from previous versions to 0.1.5.
 
 Example:
-    rails generate ribbon:encrypted_store:upgrade:zero_one_five
+    rails generate encrypted_store:upgrade:zero_one_five
 
     Creates initializer and migrations for encryption_keys and encryption_key_salts tables:
       db/migrate/upgrade_encrypted_keys_to_015.rb

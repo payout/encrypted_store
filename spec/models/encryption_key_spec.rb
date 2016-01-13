@@ -1,4 +1,4 @@
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Mixins
     module ActiveRecordMixin
       RSpec.describe EncryptionKey do
@@ -193,4 +193,4 @@ module Ribbon::EncryptedStore
       end # EncryptionKey
     end # ActiveRecordMixin
   end # Mixins
-end # Ribbon::EncryptedStore
+end # EncryptedStore

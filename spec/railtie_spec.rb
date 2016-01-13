@@ -3,7 +3,7 @@ require 'rails/generators'
 Dummy::Application.load_tasks
 Dummy::Application.load_generators
 
-module Ribbon::EncryptedStore
+module EncryptedStore
   RSpec.describe Railtie do
     describe 'rake_tasks' do
       describe 'new_key' do
@@ -54,4 +54,4 @@ module Ribbon::EncryptedStore
       end # encrypt_table
     end # generators
   end # Railtie
-end # Ribbon::EncryptedStore
+end # EncryptedStore

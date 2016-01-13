@@ -1,4 +1,4 @@
-module Ribbon::EncryptedStore
+module EncryptedStore
   module Mixins
     RSpec.describe ActiveRecordMixin do
       describe '#attr_encrypted' do
@@ -65,11 +65,11 @@ module Ribbon::EncryptedStore
           let(:iter_mag) { 2 }
 
           before {
-            Ribbon::EncryptedStore.config.iteration_magnitude = iter_mag
+            EncryptedStore.config.iteration_magnitude = iter_mag
           }
 
           after {
-            Ribbon::EncryptedStore.config.iteration_magnitude = nil
+            EncryptedStore.config.iteration_magnitude = nil
           }
 
           it "should use the configured magnitude" do
@@ -105,4 +105,4 @@ module Ribbon::EncryptedStore
       end # #reencrypt
     end # ActiveRecordMixin
   end # Mixins
-end # Ribbon::EncryptedStore
+end # EncryptedStore
