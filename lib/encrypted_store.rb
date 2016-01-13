@@ -1,8 +1,8 @@
 require 'encrypted_store/version'
-require 'ribbon/config'
 
 module EncryptedStore
   require 'encrypted_store/railtie' if defined?(Rails)
+  autoload(:Config,     'encrypted_store/config')
   autoload(:CryptoHash, 'encrypted_store/crypto_hash')
   autoload(:Instance,   'encrypted_store/instance')
   autoload(:Errors,     'encrypted_store/errors')

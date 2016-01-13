@@ -1,7 +1,7 @@
 module EncryptedStore
   class Instance
     def config(&block)
-      (@__config ||= Ribbon::Config.new).tap { |config|
+      (@__config ||= Config.new).tap { |config|
         if block_given?
           config.define(&block)
         end
