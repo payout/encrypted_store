@@ -29,7 +29,7 @@ module EncryptedStore
                                      : model.where("encryption_key_id IN (?)", key_ids)
 
             records.find_in_batches do |batch|
-              batch.each { |record| record.reencrypt!(pkey) }
+              batch.each { |record| record.reencrypt(pkey) }
             end
           }
 

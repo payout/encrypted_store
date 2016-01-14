@@ -87,7 +87,7 @@ module EncryptedStore
 
           it 'should use new encryption_key_id if it changed since loading' do
             new_key = EncryptionKey.new_key
-            DummyModel.last.reencrypt!(new_key)
+            DummyModel.last.reencrypt(new_key)
             is_expected.to have_attributes(
               name: 'Bob',
               age: 20,
@@ -101,7 +101,7 @@ module EncryptedStore
         end # with pre-existing record
       end # save
 
-      describe '#reencrypt!', :reencrypt! do
+      describe '#reencrypt', :reencrypt do
         let(:dummy_record) { DummyModel.new }
 
         before do
@@ -111,7 +111,7 @@ module EncryptedStore
         end
 
         let(:new_key) { EncryptionKey.new_key }
-        subject { dummy_record.reencrypt!(new_key) }
+        subject { dummy_record.reencrypt(new_key) }
 
         it 'should persist record with new key' do
           subject
