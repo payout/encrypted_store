@@ -1,7 +1,7 @@
 module EncryptedStore
   module ActiveRecord
     RSpec.describe EncryptionKey do
-      describe '#primary_encryption_key' do
+      describe '::primary_encryption_key', :primary_encryption_key do
         subject { EncryptionKey.primary_encryption_key }
 
         context 'with no keys set yet' do
@@ -25,9 +25,9 @@ module EncryptedStore
           }
           it { is_expected.to eq EncryptionKey.last }
         end
-      end # #primary_encryption_key
+      end # ::primary_encryption_key
 
-      describe '#new_key' do
+      describe '::new_key', :new_key do
         let(:custom_key) { nil }
         let(:new_key) { EncryptionKey.new_key(custom_key) }
         before { new_key }
@@ -65,9 +65,9 @@ module EncryptedStore
             expect(EncryptionKey.where(primary: true).count).to eq 1
           end
         end # with custom_key arg
-      end # #new_key
+      end # ::new_key
 
-      describe '#retire_keys' do
+      describe '::retire_keys', :retire_keys do
         let(:key_ids) { [] }
         let(:dummy_record) { DummyModel.new }
         let(:dummy_record_2) { DummyModel.new }
@@ -164,31 +164,36 @@ module EncryptedStore
             expect(DummyModel.find(dummy_record_2.id).encryption_key_id).not_to eq dummy_record_2.encryption_key_id
           end
         end
-      end # #retire_keys
+      end # ::retire_keys
 
-      describe '#rotate_keys' do
-        let(:dummy_record) { DummyModel.new }
-        let(:dummy_record_2) { DummyModel.new }
-        before {
-          dummy_record.name = "joe"
-          dummy_record.age = 14
-          dummy_record.save!
+      describe '::rotate_keys', :rotate_keys do
+        subject { EncryptionKey.rotate_keys }
 
-          EncryptionKey.new_key
-          dummy_record_2.name = "bob"
-          dummy_record_2.age = 10
-          dummy_record_2.save!
+        before do
+          5.times {
+            DummyModel.create!(name: 'Joe', age: 14, unencrypted_value: 'value')
+          }
+        end
 
-          EncryptionKey.rotate_keys
-        }
+        let(:orig_key) { EncryptionKey.first }
+        let(:new_key) { EncryptionKey.last }
 
         it 'should rotate all of the keys' do
-          expect(DummyModel.find(dummy_record.id).encryption_key_id).to eq EncryptionKey.last.id
-          expect(DummyModel.find(dummy_record.id).encryption_key_id).not_to eq dummy_record.encryption_key_id
-          expect(DummyModel.find(dummy_record_2.id).encryption_key_id).to eq EncryptionKey.last.id
-          expect(DummyModel.find(dummy_record_2.id).encryption_key_id).not_to eq dummy_record_2.encryption_key_id
+          expect(DummyModel.all.map(&:encryption_key_id).uniq)
+            .to eq [orig_key.id]
+
+          subject
+
+          expect(DummyModel.all.map(&:encryption_key_id).uniq)
+            .to eq [new_key.id]
         end
-      end # #rotate_keys
+
+        it 'should not corrupt encryption of records' do
+          subject
+          expect(DummyModel.all.map(&:_crypto_hash))
+            .to eq [{name: 'Joe', age: 14}] * 5
+        end
+      end # ::rotate_keys
     end # EncryptionKey
   end # ActiveRecord
 end # EncryptedStore
