@@ -5,7 +5,9 @@ module EncryptedStore
     module Mixin
       class << self
         def included(base)
-          base.before_save(:_encrypted_store_save)
+          base.before_save(:_encrypted_store_save,
+            if: :encrypted_attributes_changed?)
+
           base.extend(ClassMethods)
         end
 
@@ -39,12 +41,14 @@ module EncryptedStore
       # Instance Methods
       ##
       def reencrypt(encryption_key)
-        self.encryption_key_id = encryption_key.id
-        @_reencrypting = true
-      end
-
-      def reencrypt!(encryption_key)
-        reencrypt(encryption_key).tap { save! }
+        with_lock do
+          # Must decrypt any changes made to the encrypted data, before updating
+          # the encryption_key_id.
+          _decrypt_encrypted_store
+          self.encryption_key_id = encryption_key.id
+          _encrypt_encrypted_store
+          save!
+        end
       end
 
       def _encrypted_store_data
@@ -63,6 +67,18 @@ module EncryptedStore
         @_crypto_hash = CryptoHash.decrypt(_decrypted_key, self.encrypted_store)
       end
 
+      def _encrypt_encrypted_store
+        iter_mag = EncryptedStore.config.iteration_magnitude? ?
+                   EncryptedStore.config.iteration_magnitude  :
+                   -1
+
+        self.encrypted_store = _crypto_hash.encrypt(
+          _decrypted_key,
+          EncryptionKeySalt.generate_salt(_encryption_key_id),
+          iter_mag
+        )
+      end
+
       def _decrypted_key
         EncryptedStore.retrieve_dek(EncryptionKey, _encryption_key_id)
       end
@@ -79,30 +95,15 @@ module EncryptedStore
       ##
       # Checks if any of the encrypted attributes are in the list of changed
       # attributes
-      def _encrypted_store_attributes_changed?
+      def encrypted_attributes_changed?
         !(changed.map(&:to_sym) & _encrypted_store_data[:encrypted_attributes])
           .empty?
       end
 
       def _encrypted_store_save
-        if _encrypted_store_attributes_changed? || @_reencrypting
-          if @_reencrypting
-            _encrypted_store_sync_data
-            @_reencrypting = false
-          else
-            _encrypted_store_sync_key
-          end
-
-          iter_mag = EncryptedStore.config.iteration_magnitude? ?
-                     EncryptedStore.config.iteration_magnitude  :
-                     -1
-
-          self.encrypted_store = _crypto_hash.encrypt(
-            _decrypted_key,
-            EncryptionKeySalt.generate_salt(_encryption_key_id),
-            iter_mag
-          )
-        end
+        _crypto_hash # make sure we have a cached copy of the decrypted data.
+        _encrypted_store_sync_key
+        _encrypt_encrypted_store
       end
 
       ##
@@ -119,22 +120,6 @@ module EncryptedStore
             self.encryption_key_id = record.encryption_key_id
           end
         end
-      end
-
-      ##
-      # Does the opposite of _encrypted_store_sync_key. Locks the record,
-      # reloading all the data except for the encryption_key_id.
-      #
-      # Used when reencrypting the record.
-      def _encrypted_store_sync_data
-        encryption_key_id = self.encryption_key_id
-        lock!
-
-        # Must decrypt any changes made to the encrypted data, before updating
-        # the encryption_key_id.
-        _decrypt_encrypted_store
-
-        self.encryption_key_id = encryption_key_id
       end
     end # Mixin
   end # ActiveRecord
