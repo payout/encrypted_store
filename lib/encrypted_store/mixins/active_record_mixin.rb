@@ -48,7 +48,6 @@ module EncryptedStore
       # Instance Methods
       ##
       def reencrypt(encryption_key)
-        _crypto_hash
         self.encryption_key_id = encryption_key.id
         @_reencrypting = true
       end
@@ -66,7 +65,11 @@ module EncryptedStore
       end
 
       def _crypto_hash
-        @_crypto_hash ||= CryptoHash.decrypt(_decrypted_key, self.encrypted_store)
+        @_crypto_hash || _decrypt_encrypted_store
+      end
+
+      def _decrypt_encrypted_store
+        @_crypto_hash = CryptoHash.decrypt(_decrypted_key, self.encrypted_store)
       end
 
       def _decrypted_key
@@ -135,6 +138,11 @@ module EncryptedStore
       def _encrypted_store_sync_data
         encryption_key_id = self.encryption_key_id
         lock!
+
+        # Must decrypt any changes made to the encrypted data, before updating
+        # the encryption_key_id.
+        _decrypt_encrypted_store
+
         self.encryption_key_id = encryption_key_id
       end
     end # ActiveRecordMixin

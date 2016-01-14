@@ -24,84 +24,117 @@ module EncryptedStore
         end
       end
 
-      describe 'saving' do
-        let(:dummy_record) { DummyModel.new(name: 'test', age: 12) }
-        subject { dummy_record.tap { |d| d.save! } }
+      describe 'save!' do
+        subject { dummy_record.tap { |x| x.save! } }
 
-        context 'with attributes changed' do
-          before {
-            dummy_record.age = 13
-            dummy_record.save
-          }
-
-          it { is_expected.to eq DummyModel.last }
-          it 'should have all of the fields set' do
-            dm = DummyModel.last
-            expect(dm.name).to eq dummy_record.name
-            expect(dm.age).to eq dummy_record.age
-          end
-
-          context 'without calling save' do
-            before { dummy_record.age = 14 }
-
-            it 'should set the field as changed' do
-              expect(dummy_record.changes).to eq({"age"=>[13, 14]})
-            end
-
-            it 'should not save encrypted_store' do
-              expect(DummyModel.last.age).to eq 13
-            end
-          end # without calling save
-        end # with attributes changed
-
-        context 'without iteration_magnitude config' do
-          it 'should use a magnitude of -1' do
-            # 255 is -1 as a signed byte.
-            expect(subject.encrypted_store.bytes[2]).to eq 255
-          end
-        end # without iteration_magnitude config
-
-        context 'with iteration_magnitude config set' do
-          let(:iter_mag) { 2 }
-
-          before {
-            EncryptedStore.config.iteration_magnitude = iter_mag
-          }
-
-          after {
-            EncryptedStore.config.iteration_magnitude = nil
-          }
-
-          it "should use the configured magnitude" do
-            expect(subject.encrypted_store.bytes[2]).to eq iter_mag
-          end
-        end # with iteration_magnitude config set
-      end # saving
-
-      describe '#reencrypt' do
-        let(:dummy_record) { DummyModel.new }
-        before {
-          dummy_record.age = 5
-          dummy_record.name = "joe"
-          dummy_record.save
+        let(:initial_attributes) {
+          { name: 'Joe', age: 12, unencrypted_value: 'value' }
         }
 
-        it 'should not save the new key with reencrypt' do
-          new_key = ActiveRecordMixin::EncryptionKey.new_key
-          dummy_record.reencrypt(new_key)
-          expect(DummyModel.find(dummy_record).encryption_key_id).not_to eq new_key.id
-          expect(DummyModel.find(dummy_record).age).to eq dummy_record.age
-          expect(DummyModel.find(dummy_record).name).to eq dummy_record.name
+        context 'with new record' do
+          let(:dummy_record) { DummyModel.new(initial_attributes) }
+
+          it 'should persist values' do
+            is_expected.to have_attributes(
+              name: 'Joe',
+              age: 12,
+              unencrypted_value: 'value',
+              persisted?: true,
+              changes: {},
+              changed?: false
+            )
+          end
+
+          context 'without iteration_magnitude config' do
+            it 'should use a magnitude of -1' do
+              # 255 is -1 as a signed byte.
+              expect(subject.encrypted_store.bytes[2]).to eq 255
+            end
+          end # without iteration_magnitude config
+
+          context 'with iteration_magnitude config set' do
+            let(:iter_mag) { 2 }
+
+            before { EncryptedStore.config.iteration_magnitude = iter_mag }
+            after { EncryptedStore.config.iteration_magnitude = nil }
+
+            it "should use the configured magnitude" do
+              expect(subject.encrypted_store.bytes[2]).to eq iter_mag
+            end
+          end # with iteration_magnitude config set
+        end # with new record
+
+        context 'with pre-existing record' do
+          let(:dummy_record) { DummyModel.last }
+          before { DummyModel.create!(initial_attributes) }
+
+          let(:changed_attributes) {
+            { name: 'Bob', age: 20, unencrypted_value: 'changed' }
+          }
+
+          before { dummy_record.assign_attributes(changed_attributes) }
+
+          it 'should persist changes' do
+            is_expected.to have_attributes(
+              name: 'Bob',
+              age: 20,
+              unencrypted_value: 'changed',
+              persisted?: true,
+              changes: {},
+              changed?: false
+            )
+          end
+
+          it 'should use new encryption_key_id if it changed since loading' do
+            new_key = ActiveRecordMixin::EncryptionKey.new_key
+            DummyModel.last.reencrypt!(new_key)
+            is_expected.to have_attributes(
+              name: 'Bob',
+              age: 20,
+              unencrypted_value: 'changed',
+              persisted?: true,
+              changes: {},
+              changed?: false,
+              encryption_key_id: new_key.id
+            )
+          end
+        end # with pre-existing record
+      end # save
+
+      describe '#reencrypt!', :reencrypt! do
+        let(:dummy_record) { DummyModel.new }
+
+        before do
+          dummy_record.age = 5
+          dummy_record.name = "joe"
+          dummy_record.save!
         end
 
-        it 'should reencrypt with the new encryption key' do
-          prv_key_id = dummy_record.encryption_key_id
-          new_key = ActiveRecordMixin::EncryptionKey.new_key
-          dummy_record.reencrypt!(new_key)
-          expect(dummy_record.encryption_key_id).to eq new_key.id
-          expect(dummy_record.age).to eq 5
-          expect(dummy_record.name).to eq "joe"
+        let(:new_key) { ActiveRecordMixin::EncryptionKey.new_key }
+        subject { dummy_record.reencrypt!(new_key) }
+
+        it 'should persist record with new key' do
+          subject
+          expect(dummy_record.reload).to have_attributes(
+            encryption_key_id: new_key.id, age: 5, name: 'joe'
+          )
         end
+
+        context 'with record changed since initial load' do
+          before do
+            DummyModel.find(dummy_record.id).update_attributes(
+              name: 'changed',
+              unencrypted_value: 'changed'
+            )
+          end
+
+          it 'should reload record before re-encrypting' do
+            subject
+            expect(dummy_record.reload).to have_attributes(
+              age: 5, name: 'changed', unencrypted_value: 'changed'
+            )
+          end
+        end # with record changed since initial load
       end # #reencrypt
     end # ActiveRecordMixin
   end # Mixins
