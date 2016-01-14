@@ -24,7 +24,45 @@ module EncryptedStore
         end
       end
 
-      describe 'save!' do
+      describe '#encrypted_attributes_changed?' do
+        let(:dummy_record) { DummyModel.new }
+        subject { dummy_record.encrypted_attributes_changed? }
+
+        context 'without any changes' do
+          it { is_expected.to be false }
+        end
+
+        context 'with one encrypted attribute changed' do
+          before { dummy_record.name = 'changed' }
+          it { is_expected.to be true }
+        end
+
+        context 'with two encrypted attribute changed' do
+          before do
+            dummy_record.name = 'changed'
+            dummy_record.age = 1234
+          end
+
+          it { is_expected.to be true }
+        end
+
+        context 'with unencrypted value changed' do
+          before { dummy_record.unencrypted_value = 'changed' }
+          it { is_expected.to be false }
+        end
+
+        context 'with encryption_key_id changed' do
+          before { dummy_record.encryption_key_id = -1 }
+          it { is_expected.to be false }
+        end
+
+        context 'with encrypted_store column changed' do
+          before { dummy_record.encrypted_store = 'changed' }
+          it { is_expected.to be false }
+        end
+      end # #encrypted_attributes_changed?
+
+      describe '#save!' do
         subject { dummy_record.tap { |x| x.save! } }
 
         let(:initial_attributes) {
@@ -99,7 +137,7 @@ module EncryptedStore
             )
           end
         end # with pre-existing record
-      end # save
+      end # #save!
 
       describe '#reencrypt', :reencrypt do
         let(:dummy_record) { DummyModel.new }

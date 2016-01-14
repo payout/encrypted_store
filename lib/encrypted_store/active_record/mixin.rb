@@ -5,7 +5,9 @@ module EncryptedStore
     module Mixin
       class << self
         def included(base)
-          base.before_save(:_encrypted_store_save)
+          base.before_save(:_encrypted_store_save,
+            if: :encrypted_attributes_changed?)
+
           base.extend(ClassMethods)
         end
 
@@ -93,17 +95,15 @@ module EncryptedStore
       ##
       # Checks if any of the encrypted attributes are in the list of changed
       # attributes
-      def _encrypted_store_attributes_changed?
+      def encrypted_attributes_changed?
         !(changed.map(&:to_sym) & _encrypted_store_data[:encrypted_attributes])
           .empty?
       end
 
       def _encrypted_store_save
-        if _encrypted_store_attributes_changed?
-          _crypto_hash # make sure we have a cached copy of the decrypted data.
-          _encrypted_store_sync_key
-          _encrypt_encrypted_store
-        end
+        _crypto_hash # make sure we have a cached copy of the decrypted data.
+        _encrypted_store_sync_key
+        _encrypt_encrypted_store
       end
 
       ##
