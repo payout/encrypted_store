@@ -8,7 +8,7 @@ module EncryptedStore
 
         class << self
           def next_migration_number(*args)
-            ActiveRecord::Generators::Base.next_migration_number(*args)
+            ::ActiveRecord::Generators::Base.next_migration_number(*args)
           end
         end # Class Methods
 

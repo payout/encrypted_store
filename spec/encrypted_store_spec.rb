@@ -69,7 +69,7 @@ RSpec.describe EncryptedStore do
     before { instance.preload_keys(1) }
     subject { instance.instance_variable_get(:@_decrypted_keys) }
 
-    let(:primary_key) { EncryptedStore::Mixins::ActiveRecordMixin::EncryptionKey.primary_encryption_key }
+    let(:primary_key) { EncryptedStore::ActiveRecord::EncryptionKey.primary_encryption_key }
     let(:expected_keys) { { primary_key.id => primary_key.decrypted_key } }
 
     it { is_expected.to eq expected_keys }

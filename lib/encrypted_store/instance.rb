@@ -9,13 +9,13 @@ module EncryptedStore
     end
 
     def rotate_keys
-      EncryptedStore::Mixins::ActiveRecordMixin::EncryptionKey.rotate_keys
+      EncryptedStore::ActiveRecord.rotate_keys
     end
 
     ##
     # Preloads the most recent `amount` keys.
     def preload_keys(amount=12)
-      keys = Mixins::ActiveRecordMixin.preload_keys(amount)
+      keys = EncryptedStore::ActiveRecord.preload_keys(amount)
       keys.each { |k| (@_decrypted_keys ||= {})[k.id] = k.decrypted_key }
     end
 

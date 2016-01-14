@@ -1,6 +1,6 @@
 module EncryptedStore
-  module Mixins
-    RSpec.describe ActiveRecordMixin do
+  module ActiveRecord
+    RSpec.describe Mixin do
       describe '#attr_encrypted' do
         let(:dummy_record) { DummyModel.new }
 
@@ -86,7 +86,7 @@ module EncryptedStore
           end
 
           it 'should use new encryption_key_id if it changed since loading' do
-            new_key = ActiveRecordMixin::EncryptionKey.new_key
+            new_key = EncryptionKey.new_key
             DummyModel.last.reencrypt!(new_key)
             is_expected.to have_attributes(
               name: 'Bob',
@@ -110,7 +110,7 @@ module EncryptedStore
           dummy_record.save!
         end
 
-        let(:new_key) { ActiveRecordMixin::EncryptionKey.new_key }
+        let(:new_key) { EncryptionKey.new_key }
         subject { dummy_record.reencrypt!(new_key) }
 
         it 'should persist record with new key' do
@@ -136,6 +136,6 @@ module EncryptedStore
           end
         end # with record changed since initial load
       end # #reencrypt
-    end # ActiveRecordMixin
-  end # Mixins
+    end # Mixin
+  end # ActiveRecord
 end # EncryptedStore

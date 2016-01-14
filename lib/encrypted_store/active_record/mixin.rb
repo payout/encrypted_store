@@ -1,11 +1,8 @@
 require 'securerandom'
 
 module EncryptedStore
-  module Mixins
-    module ActiveRecordMixin
-      autoload(:EncryptionKeySalt, 'encrypted_store/mixins/active_record_mixin/encryption_key_salt')
-      autoload(:EncryptionKey,     'encrypted_store/mixins/active_record_mixin/encryption_key')
-
+  module ActiveRecord
+    module Mixin
       class << self
         def included(base)
           base.before_save(:_encrypted_store_save)
@@ -14,19 +11,13 @@ module EncryptedStore
 
         def descendants
           Rails.application.eager_load! if defined?(Rails) && Rails.application
-          ActiveRecord::Base.descendants.select { |model| model < Mixins::ActiveRecordMixin }
+          ::ActiveRecord::Base.descendants.select { |model| model < Mixin }
         end
 
         def descendants?
           !descendants.empty?
         end
-
-        ##
-        # Preloads the most recent `amount` keys.
-        def preload_keys(amount)
-          EncryptionKey.preload(amount) if descendants?
-        end
-      end # Module Methods
+      end # Class Methods
 
       module ClassMethods
         def _encrypted_store_data
@@ -145,6 +136,6 @@ module EncryptedStore
 
         self.encryption_key_id = encryption_key_id
       end
-    end # ActiveRecordMixin
-  end # Mixins
+    end # Mixin
+  end # ActiveRecord
 end # EncryptedStore
