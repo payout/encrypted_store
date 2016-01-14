@@ -28,7 +28,10 @@ module EncryptedStore
             ActiveRecordMixin.descendants.each { |model|
               records = key_ids.empty? ? model.where("encryption_key_id != ?", pkey.id)
                                        : model.where("encryption_key_id IN (?)", key_ids)
-              records.each { |record| record.reencrypt!(pkey) }
+
+              records.find_in_batches do |batch|
+                batch.each { |record| record.reencrypt!(pkey) }
+              end
             }
 
             pkey
