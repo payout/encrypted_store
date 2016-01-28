@@ -51,6 +51,15 @@ module EncryptedStore
         end
       end
 
+      ##
+      # Completely purges encrypted data for a record
+      def purge_encrypted_data
+        self.encrypted_store = nil
+        self.encryption_key_id = nil
+        @_crypto_hash = nil
+        save!(validate: false)
+      end
+
       def _encrypted_store_data
         self.class._encrypted_store_data
       end
