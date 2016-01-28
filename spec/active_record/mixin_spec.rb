@@ -183,6 +183,7 @@ module EncryptedStore
         before do
           dummy_record.age = 5
           dummy_record.name = "joe"
+          dummy_record.unencrypted_value = "test"
           dummy_record.save!
 
           subject
@@ -198,6 +199,10 @@ module EncryptedStore
 
         it 'should not have any data cached in crypto_hash' do
           expect(dummy_record.send(:_crypto_hash)).to eq({})
+        end
+
+        it 'should not delete non-encrypted data' do
+          expect(dummy_record.unencrypted_value).to eq "test"
         end
       end # #purge_encrypted_data
     end # Mixin
