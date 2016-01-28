@@ -174,6 +174,32 @@ module EncryptedStore
           end
         end # with record changed since initial load
       end # #reencrypt
+
+      describe '#purge_encrypted_data' do
+        let(:dummy_record) { DummyModel.new }
+
+        subject { dummy_record.purge_encrypted_data }
+
+        before do
+          dummy_record.age = 5
+          dummy_record.name = "joe"
+          dummy_record.save!
+
+          subject
+        end
+
+        it 'should purge the encrypted_store column' do
+          expect(dummy_record.encrypted_store).to be nil
+        end
+
+        it 'should purge the encrypted_key_id column' do
+          expect(dummy_record.encryption_key_id).to be nil
+        end
+
+        it 'should not have any data cached in crypto_hash' do
+          expect(dummy_record.send(:_crypto_hash)).to eq({})
+        end
+      end # #purge_encrypted_data
     end # Mixin
   end # ActiveRecord
 end # EncryptedStore
