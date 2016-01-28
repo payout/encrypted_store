@@ -47,7 +47,7 @@ module EncryptedStore
           _decrypt_encrypted_store
           self.encryption_key_id = encryption_key.id
           _encrypt_encrypted_store
-          save!
+          save!(validate: false)
         end
       end
 

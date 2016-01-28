@@ -4,5 +4,7 @@ class DummyModel < ActiveRecord::Base
   include EncryptedStore
   attr_encrypted :name, :age, "username"
 
-  validates_presence_of :name
+  # Validators that read/write to encrypted attributes shouldn't cause problems,
+  # particularly when reencrypting records.
+  validate { self.name = name }
 end
