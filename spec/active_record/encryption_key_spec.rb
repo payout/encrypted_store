@@ -194,6 +194,29 @@ module EncryptedStore
             .to eq [{name: 'Joe', age: 14}] * 5
         end
       end # ::rotate_keys
+
+      describe '::preload', :preload do
+        subject { EncryptionKey.preload(amount) }
+
+        before do
+          key_count.times { EncryptionKey.new_key }
+        end
+
+        let(:oldest_key) { EncryptionKey.first }
+
+        context 'with amount 3 and 4 keys' do
+          let(:amount) { 3 }
+          let(:key_count) { 4 }
+
+          it 'should return 3 keys' do
+            expect(subject.count).to eq 3
+          end
+
+          it 'should not return the oldest key' do
+            expect(subject.map(&:id)).not_to include(oldest_key.id)
+          end
+        end
+      end # ::preload
     end # EncryptionKey
   end # ActiveRecord
 end # EncryptedStore
