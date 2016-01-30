@@ -12,7 +12,7 @@ module EncryptedStore
           where(primary: true).last || last
         end
 
-        def new_key(custom_key=nil)
+        def new_key(custom_key = nil)
           dek = custom_key || SecureRandom.random_bytes(32)
 
           transaction {
@@ -21,7 +21,7 @@ module EncryptedStore
           }
         end
 
-        def retire_keys(key_ids=[])
+        def retire_keys(key_ids = [])
           pkey = primary_encryption_key
 
           ActiveRecord::Mixin.descendants.each { |model|
@@ -40,7 +40,7 @@ module EncryptedStore
         # Preload the most recent `amount` keys.
         def preload(amount)
           primary_encryption_key # Ensure there's at least a primary key
-          order(:created_at).limit(amount)
+          order('id DESC').limit(amount)
         end
 
         def rotate_keys
