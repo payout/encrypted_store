@@ -4,3 +4,8 @@ rvm:
   - "2.1.7"
   - "2.2.2"
 script: bundle exec rspec
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database encrypted_store_dummy_test;' -U postgres
+  - RACK_ENV=test rake db:migrate
