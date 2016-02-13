@@ -8,4 +8,4 @@ services:
   - postgresql
 before_script:
   - psql -c 'create database encrypted_store_dummy_test;' -U postgres
-  - RACK_ENV=test rake db:migrate
+  - RACK_ENV=test bundle exec rake db:migrate
