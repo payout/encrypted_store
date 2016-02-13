@@ -34,10 +34,14 @@ GEM
     arel (4.0.2)
     bcrypt (3.1.10)
     builder (3.1.4)
+    codeclimate-test-reporter (0.4.8)
+      simplecov (>= 0.7.1, < 1.0.0)
     database_cleaner (1.4.1)
     diff-lcs (1.2.5)
+    docile (1.1.5)
     erubis (2.7.0)
     i18n (0.7.0)
+    json (1.8.3)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
     mime-types (2.4.3)
@@ -82,6 +86,11 @@ GEM
       rspec-mocks (~> 3.2.0)
       rspec-support (~> 3.2.0)
     rspec-support (3.2.2)
+    simplecov (0.11.2)
+      docile (~> 1.1.0)
+      json (~> 1.8)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
     sprockets (3.0.1)
       rack (~> 1.0)
     sprockets-rails (2.2.4)
@@ -96,6 +105,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  codeclimate-test-reporter
   database_cleaner
   encrypted_store!
   pg
